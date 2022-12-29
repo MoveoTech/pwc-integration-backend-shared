@@ -8,27 +8,22 @@ const error_1 = require("../types/errors/error");
 const logger = logger_service_1.LoggerService.getLogger();
 class SecretsService {
     constructor() {
-        this.keyVaultName = process.env.KEY_VAULT_NAME || '';
         logger.info({
             message: 'start ctor',
             fileName: 'secrets service',
             functionName: 'constructor',
         });
         this.credential = new identity_1.DefaultAzureCredential();
-        const url = 'https://' + this.keyVaultName + '.vault.azure.net';
+        console.log('credential: ', JSON.stringify(this.credential));
+        console.log('KEY_VAULT_NAME: ', process.env.KEY_VAULT_NAME);
+        const url = `https://${process.env.KEY_VAULT_NAME}.vault.azure.net`;
         this.client = new keyvault_secrets_1.SecretClient(url, this.credential);
+        console.log('SecretClient: ', JSON.stringify(this.client));
         logger.info({
             message: 'initialized secrets service',
             fileName: 'secrets service',
             functionName: 'constructor',
         });
-    }
-    static getSecretsService() {
-        if (this.secretsServiceInstance) {
-            return this.secretsServiceInstance;
-        }
-        this.secretsServiceInstance = new SecretsService();
-        return this.secretsServiceInstance;
     }
     async getSecret(secretName) {
         try {
