@@ -1,3 +1,0 @@
-export const MONDAY_COMPLEXITY = {
-  MIN_COMPLEXITY_POINTS: 20000,
-};
