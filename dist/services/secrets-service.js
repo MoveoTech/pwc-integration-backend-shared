@@ -9,9 +9,19 @@ const logger = logger_service_1.LoggerService.getLogger();
 class SecretsService {
     constructor() {
         this.keyVaultName = process.env.KEY_VAULT_NAME || '';
+        logger.info({
+            message: 'start ctor',
+            fileName: 'secrets service',
+            functionName: 'constructor',
+        });
         this.credential = new identity_1.DefaultAzureCredential();
         const url = 'https://' + this.keyVaultName + '.vault.azure.net';
         this.client = new keyvault_secrets_1.SecretClient(url, this.credential);
+        logger.info({
+            message: 'initialized secrets service',
+            fileName: 'secrets service',
+            functionName: 'constructor',
+        });
     }
     static getSecretsService() {
         if (this.secretsServiceInstance) {
