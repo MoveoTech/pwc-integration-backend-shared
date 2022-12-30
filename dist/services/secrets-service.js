@@ -23,6 +23,41 @@ class SecretsService {
             functionName: 'constructor',
         });
     }
+    async setSecret(secretName, secretValue) {
+        try {
+            logger.info({
+                message: 'before setting secret',
+                fileName: 'secrets service',
+                functionName: 'setSecret',
+                data: `secret name: ${secretName}`,
+            });
+            const result = await this.client.setSecret(secretName, secretValue);
+            if (result && result.value) {
+                logger.info({
+                    message: 'success setting secret',
+                    fileName: 'secrets service',
+                    functionName: 'setSecret',
+                    data: `secret name: ${secretName}`,
+                });
+                return [null, result.value];
+            }
+            logger.info({
+                message: 'secret value is empty',
+                fileName: 'secrets service',
+                functionName: 'setSecret',
+                data: `secret: ${JSON.stringify(result)}`,
+            });
+            return [new error_1.InternalServerError(), null];
+        }
+        catch (error) {
+            logger.error({
+                message: `catch: ${JSON.stringify(error)}`,
+                fileName: 'secrets service',
+                functionName: 'setSecret',
+            });
+            return [error, null];
+        }
+    }
     async getSecret(secretName) {
         try {
             logger.info({
