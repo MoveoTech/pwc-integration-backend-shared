@@ -13,12 +13,10 @@ class SecretsService {
             fileName: 'secrets service',
             functionName: 'constructor',
         });
-        this.credential = new identity_1.DefaultAzureCredential();
-        console.log('credential: ', JSON.stringify(this.credential));
-        console.log('KEY_VAULT_NAME: ', process.env.KEY_VAULT_NAME);
+        this.credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
+        console.log(' this.cred: ', JSON.stringify(this.credential));
         const url = `https://${process.env.KEY_VAULT_NAME}.vault.azure.net`;
         this.client = new keyvault_secrets_1.SecretClient(url, this.credential);
-        console.log('SecretClient: ', JSON.stringify(this.client));
         logger.info({
             message: 'initialized secrets service',
             fileName: 'secrets service',
