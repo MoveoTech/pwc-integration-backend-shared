@@ -14,10 +14,8 @@ class SecretsService {
             functionName: 'constructor',
         });
         this.credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
-        console.log(' this.cred: ', JSON.stringify(this.credential));
         const url = `https://${process.env.KEY_VAULT_NAME}.vault.azure.net`;
         this.client = new keyvault_secrets_1.SecretClient(url, this.credential);
-        console.log('this.client ctor: ', JSON.stringify(this.client));
         logger.info({
             message: 'initialized secrets service',
             fileName: 'secrets service',
@@ -26,7 +24,6 @@ class SecretsService {
     }
     async setSecret(secretName, secretValue) {
         try {
-            console.log('this.client set: ', JSON.stringify(this.client));
             logger.info({
                 message: 'before setting secret',
                 fileName: 'secrets service',
@@ -52,7 +49,6 @@ class SecretsService {
             return [new error_1.InternalServerError(), null];
         }
         catch (error) {
-            console.log('error: ', error);
             logger.error({
                 message: `catch: ${JSON.stringify(error)}`,
                 fileName: 'secrets service',
@@ -88,7 +84,6 @@ class SecretsService {
             return [new error_1.InternalServerError(), null];
         }
         catch (error) {
-            console.log('error: ', error);
             logger.error({
                 message: `catch: ${JSON.stringify(error)}`,
                 fileName: 'secrets service',
