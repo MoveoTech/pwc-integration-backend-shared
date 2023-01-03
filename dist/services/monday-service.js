@@ -217,16 +217,22 @@ class MondayService {
         const cacheService = cache_service_1.CacheService.getCacheService();
         const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
         if (!cachedComplexity) {
+            console.log('no complexity, add to queue');
             await this.queueService.addToQueue(query, variables);
             return [null, 'success'];
         }
         const complexity = JSON.parse(cachedComplexity);
-        if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < complexity.before) {
+        if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < parseInt(complexity.before)) {
+            console.log('no complexity error, add to queue: ', parseInt(complexity.before));
             await this.queueService.addToQueue(query, variables);
             return [null, 'success'];
         }
         const scheduleDate = new Date();
+        console.log('complexity error, add to queue with delay');
+        console.log('reset_in_x_seconds: ', parseInt(complexity.reset_in_x_seconds));
+        console.log('scheduleDate: ', JSON.stringify(scheduleDate));
         scheduleDate.setSeconds(scheduleDate.getSeconds() + parseInt(complexity.reset_in_x_seconds));
+        console.log('scheduleDate with delay: ', JSON.stringify(scheduleDate));
         await this.queueService.addToQueue(query, variables, scheduleDate);
         return [null, 'added with delay'];
         // END QUEUE FOR CREATION
@@ -345,7 +351,7 @@ class MondayService {
             }
             if ((response === null || response === void 0 ? void 0 : response.data) && ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.complexity)) {
                 const { complexity } = response === null || response === void 0 ? void 0 : response.data;
-                const cacheService = new cache_service_1.CacheService();
+                const cacheService = cache_service_1.CacheService.getCacheService();
                 cacheService.setKey(cache_1.CACHE.COMPLEXITY, JSON.stringify(complexity), (_c = complexity.reset_in_x_seconds) !== null && _c !== void 0 ? _c : 60);
             }
             return [null, response];

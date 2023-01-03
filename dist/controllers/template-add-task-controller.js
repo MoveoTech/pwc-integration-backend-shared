@@ -16,7 +16,7 @@ const addTask = async (request, response) => {
     var _a, _b;
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId, templateItemId, settingsBoardIds } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
-    const cacheService = new cache_service_1.CacheService();
+    const cacheService = cache_service_1.CacheService.getCacheService();
     cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
     const sharedService = new shared_service_1.SharedService();
     const mondayService = new monday_service_1.MondayService();

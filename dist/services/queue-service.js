@@ -49,7 +49,7 @@ class QueueService {
     }
     async handleMessage(message) {
         const { query, variables } = message === null || message === void 0 ? void 0 : message.body;
-        const cacheService = new cache_service_1.CacheService();
+        const cacheService = cache_service_1.CacheService.getCacheService();
         let monAccessToken = cacheService.getKey(cache_1.CACHE.MONDAY_TOKEN);
         let monAccessTokenError;
         if (!monAccessToken) {
