@@ -28,10 +28,12 @@ class QueueService {
         const credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
         const fullyQualifiedNamespace = `${process.env.SERVICE_BUS_NAMESPACE}.servicebus.windows.net`;
         this.client = new service_bus_1.ServiceBusClient(fullyQualifiedNamespace, credential);
+        console.log('queue client: ', JSON.stringify(this.client));
         return this.client;
     }
     setSender() {
         this.sender = this.client.createSender(this.queueName);
+        console.log('queue sender: ', JSON.stringify(this.sender));
         return this.sender;
     }
     setReceiver() {
@@ -42,6 +44,7 @@ class QueueService {
         }, {
             autoCompleteMessages: false,
         });
+        console.log('queue receiver: ', JSON.stringify(this.receiver));
         return this.receiver;
     }
     async handleMessage(message) {
@@ -74,6 +77,7 @@ class QueueService {
             this.receiver.abandonMessage(message);
             return;
         }
+        console.log('completeMessage');
         this.receiver.completeMessage(message);
     }
     async handleMessageError(messageError) {
@@ -91,9 +95,12 @@ class QueueService {
             },
         };
         if (delay) {
+            console.log('added to queue with delay: ', JSON.stringify(message));
+            console.log('delay: ', JSON.stringify(delay));
             await this.sender.scheduleMessages(message, delay);
             return;
         }
+        console.log('added to queue: ', JSON.stringify(message));
         await this.sender.sendMessages(message);
     }
 }
