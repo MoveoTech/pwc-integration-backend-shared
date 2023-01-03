@@ -12,10 +12,14 @@ const sync_integration_values_1 = require("../constants/sync-integration-values"
 const monday_queries_1 = require("./monday-queries");
 const monday_1 = require("../utils/monday");
 const logger_service_1 = require("./logger-service");
+const queue_service_1 = require("./queue-service");
+const cache_service_1 = require("./cache-service");
+const cache_1 = require("../constants/cache");
 const logger = logger_service_1.LoggerService.getLogger();
 class MondayService {
     constructor() {
         this.mondayClient = (0, monday_sdk_js_1.default)();
+        this.queueService = queue_service_1.QueueService.getQueueService();
     }
     async queryItemColumnsValues(monAccessToken, itemId) {
         var _a, _b, _c;
@@ -201,7 +205,6 @@ class MondayService {
         return [new error_1.InternalServerError(), null];
     }
     async createItem(monAccessToken, boardId, itemName, columnValues) {
-        var _a, _b, _c, _d;
         const query = monday_queries_1.queries.createItem;
         const variables = { itemName, boardId, columnValues: JSON.stringify(columnValues) };
         logger.info({
@@ -210,25 +213,44 @@ class MondayService {
             functionName: 'createItem',
             data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
         });
-        const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
-        if (responseError) {
-            logger.error({
-                message: `responseError: ${JSON.stringify(responseError)}`,
-                fileName: 'monday service',
-                functionName: 'createItem',
-            });
-            return [responseError, null];
+        // QUEUE FOR CREATION
+        const cacheService = cache_service_1.CacheService.getCacheService();
+        const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
+        if (!cachedComplexity) {
+            await this.queueService.addToQueue(query, variables);
+            return [null, 'success'];
         }
-        logger.info({
-            message: 'response',
-            fileName: 'monday service',
-            functionName: 'createItem',
-            data: `response: ${JSON.stringify(response === null || response === void 0 ? void 0 : response.data)}`,
-        });
-        if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.create_item) === null || _b === void 0 ? void 0 : _b.id) {
-            return [null, (_d = (_c = response === null || response === void 0 ? void 0 : response.data) === null || _c === void 0 ? void 0 : _c.create_item) === null || _d === void 0 ? void 0 : _d.id];
+        const complexity = JSON.parse(cachedComplexity);
+        if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < complexity.before) {
+            await this.queueService.addToQueue(query, variables);
+            return [null, 'success'];
         }
-        return [new error_1.InternalServerError(), null];
+        const scheduleDate = new Date();
+        scheduleDate.setSeconds(scheduleDate.getSeconds() + parseInt(complexity.reset_in_x_seconds));
+        await this.queueService.addToQueue(query, variables, scheduleDate);
+        return [null, 'added with delay'];
+        // END QUEUE FOR CREATION
+        // // LOCAL
+        // const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
+        // if (responseError) {
+        //   logger.error({
+        //     message: `responseError: ${JSON.stringify(responseError)}`,
+        //     fileName: 'monday service',
+        //     functionName: 'createItem',
+        //   });
+        //   return [responseError, null];
+        // }
+        // logger.info({
+        //   message: 'response',
+        //   fileName: 'monday service',
+        //   functionName: 'createItem',
+        //   data: `response: ${JSON.stringify(response?.data)}`,
+        // });
+        // if (response?.data?.create_item?.id) {
+        //   return [null, response?.data?.create_item?.id];
+        // }
+        // return [new InternalServerError(), null];
+        // // END LOCAL
     }
     createNotification(monAccessToken, boardId, userId, text) {
         const query = monday_queries_1.queries.createNotification;
@@ -299,6 +321,40 @@ class MondayService {
                 message: `catch error: ${JSON.stringify(error)}`,
                 fileName: 'monday service',
                 functionName: 'executeQuery',
+            });
+            return [error, null];
+        }
+    }
+    async executeQueryFromQueue(monAccessToken, query, variables) {
+        var _a, _b, _c;
+        try {
+            logger.info({
+                message: 'start',
+                fileName: 'monday service',
+                functionName: 'executeQueryFromQueue',
+                data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
+            });
+            const response = await this.mondayClient.api(query, {
+                token: monAccessToken,
+                variables,
+            });
+            if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
+                (response === null || response === void 0 ? void 0 : response.error_code) ||
+                ((_a = response === null || response === void 0 ? void 0 : response.errors) === null || _a === void 0 ? void 0 : _a.length) > 0) {
+                return [null, new error_1.InternalServerError()];
+            }
+            if ((response === null || response === void 0 ? void 0 : response.data) && ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.complexity)) {
+                const { complexity } = response === null || response === void 0 ? void 0 : response.data;
+                const cacheService = new cache_service_1.CacheService();
+                cacheService.setKey(cache_1.CACHE.COMPLEXITY, JSON.stringify(complexity), (_c = complexity.reset_in_x_seconds) !== null && _c !== void 0 ? _c : 60);
+            }
+            return [null, response];
+        }
+        catch (error) {
+            logger.error({
+                message: `catch error: ${JSON.stringify(error)}`,
+                fileName: 'monday service',
+                functionName: 'executeQueryFromQueue',
             });
             return [error, null];
         }

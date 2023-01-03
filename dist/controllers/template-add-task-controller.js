@@ -9,11 +9,15 @@ const template_add_task_service_1 = require("../services/template-add-task-servi
 const shared_service_1 = require("../services/shared-service");
 const monday_service_1 = require("../services/monday-service");
 const sync_integration_values_1 = require("../constants/sync-integration-values");
+const cache_service_1 = require("../services/cache-service");
+const cache_1 = require("../constants/cache");
 const logger = logger_service_1.LoggerService.getLogger();
 const addTask = async (request, response) => {
     var _a, _b;
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId, templateItemId, settingsBoardIds } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
+    const cacheService = new cache_service_1.CacheService();
+    cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
     const sharedService = new shared_service_1.SharedService();
     const mondayService = new monday_service_1.MondayService();
     const templateAddTaskService = new template_add_task_service_1.TemplateAddTaskService();
@@ -30,7 +34,7 @@ const addTask = async (request, response) => {
     await Promise.all(settingsBoardIds.map(async (boardIds) => {
         const [[sameTypeItemsError, sameTypeItems], [taskParentsItemsError, taskParentsItems]] = await Promise.all([
             sharedService.getSameTypeItems(monAccessToken, +boardIds.currentTaskboardBoardId, taskType),
-            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString())
+            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString()),
         ]);
         if ((sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 || sameTypeItemsError) {
             logger.error({
@@ -106,8 +110,8 @@ const addTask = async (request, response) => {
     if (itemStatus) {
         sharedService.pushNotification(monAccessToken, boardId, userId, `Task "${templateTask.name}" created successfully`);
         return response.status(200).send('success');
-        ;
     }
+    return response.status(500).send('failed');
 };
 exports.addTask = addTask;
 //# sourceMappingURL=template-add-task-controller.js.map

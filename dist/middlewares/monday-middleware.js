@@ -6,6 +6,7 @@ const secrets_1 = require("../constants/secrets");
 const logger_service_1 = require("../services/logger-service");
 const secrets_service_1 = require("../services/secrets-service");
 const logger = logger_service_1.LoggerService.getLogger();
+const secretsService = secrets_service_1.SecretsService.getSecretsService();
 const verifyAuthorization = async (request, response, next) => {
     var _a, _b;
     try {
@@ -24,7 +25,6 @@ const verifyAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'authorization error' });
         }
         // FROM AZURE KEY VAULT
-        const secretsService = new secrets_service_1.SecretsService();
         const [mondaySigningSecretError, mondaySigningSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_SIGNING_SECRET);
         if (mondaySigningSecretError) {
             logger.error({
@@ -44,7 +44,7 @@ const verifyAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'missing monday token' });
         }
         // END FROM AZURE KEY VAULT
-        // LOCAL FOR SECRET
+        // // LOCAL FOR SECRET
         // const mondaySigningSecret = process.env.MONDAY_SIGNING_SECRET;
         // if (!mondaySigningSecret) {
         //   logger.error({
@@ -63,7 +63,7 @@ const verifyAuthorization = async (request, response, next) => {
         //   });
         //   return response.status(500).send({ error: 'missing monday token' });
         // }
-        // END LOCAL FOR SECRET
+        // // END LOCAL FOR SECRET
         const { accountId, userId } = await (0, auth_1.verifyMondayAuthorization)(authorization, mondaySigningSecret);
         response.locals.mondayAuthorization = {
             accountId,
@@ -106,7 +106,6 @@ const verifyClientAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'authorization error' });
         }
         // FROM AZURE KEY VAULT
-        const secretsService = new secrets_service_1.SecretsService();
         const [mondayClientSecretError, mondayClientSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_CLIENT_SECRET);
         if (mondayClientSecretError) {
             logger.error({
@@ -126,7 +125,7 @@ const verifyClientAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'missing monday token' });
         }
         // END FROM AZURE KEY VAULT
-        // LOCAL FOR SECRET
+        // // LOCAL FOR SECRET
         // const mondayClientSecret = process.env.MONDAY_CLIENT_SECRET;
         // if (!mondayClientSecret) {
         //   logger.error({
@@ -145,7 +144,7 @@ const verifyClientAuthorization = async (request, response, next) => {
         //   });
         //   return response.status(500).send({ error: 'missing monday token' });
         // }
-        // END LOCAL FOR SECRET
+        // // END LOCAL FOR SECRET
         const { dat } = await (0, auth_1.verifyMondayAuthorization)(authorization, mondayClientSecret);
         response.locals.mondayAuthorization = {
             accountId: dat.account_id,

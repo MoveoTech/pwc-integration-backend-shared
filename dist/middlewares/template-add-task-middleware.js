@@ -24,7 +24,7 @@ const validateTemplateAddTaskInputs = async (request, response, next) => {
             boardId,
             itemId,
             templateItemId,
-            settingsBoardIds
+            settingsBoardIds,
         };
         logger.info({
             message: 'inputs success',

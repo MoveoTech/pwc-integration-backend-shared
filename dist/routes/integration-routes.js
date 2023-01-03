@@ -27,9 +27,15 @@ const express = __importStar(require("express"));
 const monday_middleware_1 = require("../middlewares/monday-middleware");
 const integration_middleware_1 = require("../middlewares/integration-middleware");
 const integration_controller_1 = require("../controllers/integration-controller");
+const activate_tasks_middleware_1 = require("../middlewares/activate-tasks-middleware");
+const template_add_task_middleware_1 = require("../middlewares/template-add-task-middleware");
+const template_add_task_controller_1 = require("../controllers/template-add-task-controller");
+const activate_tasks_controller_1 = require("../controllers/activate-tasks-controller");
 const router = express.Router();
 const integrationRoutes = () => {
     router.post('/sync-status-and-tasks', monday_middleware_1.verifyAuthorization, integration_middleware_1.validateSyncIntegrationInputs, integration_controller_1.syncStatusAndTasks);
+    router.post('/template-add-task', monday_middleware_1.verifyClientAuthorization, template_add_task_middleware_1.validateTemplateAddTaskInputs, template_add_task_controller_1.addTask);
+    router.post('/activate-tasks', monday_middleware_1.verifyClientAuthorization, activate_tasks_middleware_1.validateActivateTasksInputs, activate_tasks_controller_1.activateTasks);
     return router;
 };
 exports.default = integrationRoutes;

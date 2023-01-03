@@ -158,8 +158,8 @@ const getReturnItemColumnValues = (taskType, returnItem, isItemCustomTemplate) =
         null,
         {
             dayColumnValue,
-            monthColumnValue
-        }
+            monthColumnValue,
+        },
     ];
 };
 const calculateSubmissionsDueDate = (dateTemplateColumnsValues, relativeYear) => {

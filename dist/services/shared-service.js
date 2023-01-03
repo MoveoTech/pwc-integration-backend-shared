@@ -17,7 +17,7 @@ class SharedService {
         if (itemColumnsValuesError) {
             logger.error({
                 message: `itemColumnsValuesError: ${JSON.stringify(itemColumnsValuesError)}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getTaskType',
             });
             return [itemColumnsValuesError, null];
@@ -26,14 +26,14 @@ class SharedService {
         if (taskTypeError) {
             logger.error({
                 message: `no task type found on item: ${JSON.stringify(item)}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getTaskType',
             });
             return [taskTypeError, null];
         }
         logger.info({
             message: 'task type found',
-            fileName: 'integration service',
+            fileName: 'shared service',
             functionName: 'getTaskType',
             data: `item: ${JSON.stringify(item)}, taskType: ${taskType}`,
         });
@@ -46,8 +46,8 @@ class SharedService {
                 message: (items === null || items === void 0 ? void 0 : items.length) === 0
                     ? 'no items'
                     : `itemsError: ${JSON.stringify(itemsError)}`,
-                fileName: 'integration service',
-                functionName: 'handleSyncStatusAndTasks',
+                fileName: 'shared service',
+                functionName: 'getSameTypeItems',
             });
             return [
                 (items === null || items === void 0 ? void 0 : items.length) === 0 ? new error_1.BadRequestError() : itemsError !== null && itemsError !== void 0 ? itemsError : new error_1.InternalServerError(),
@@ -60,8 +60,8 @@ class SharedService {
                 message: (sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0
                     ? 'no matching sameTypeItems'
                     : `sameTypeItemsError: ${JSON.stringify(sameTypeItemsError)}`,
-                fileName: 'integration service',
-                functionName: 'handleSyncStatusAndTasks',
+                fileName: 'shared service',
+                functionName: 'getSameTypeItems',
             });
             return [
                 (sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 ? new error_1.BadRequestError() : sameTypeItemsError !== null && sameTypeItemsError !== void 0 ? sameTypeItemsError : new error_1.InternalServerError(),
@@ -70,8 +70,8 @@ class SharedService {
         }
         logger.info({
             message: 'sameTypeItems found',
-            fileName: 'integration service',
-            functionName: 'handleSyncStatusAndTasks',
+            fileName: 'shared service',
+            functionName: 'getSameTypeItems',
             data: `taskType: ${taskType}, sameTypeItems: ${JSON.stringify(sameTypeItems)}`,
         });
         return [null, sameTypeItems];
@@ -81,7 +81,7 @@ class SharedService {
         if (returnOrderColumnError) {
             logger.error({
                 message: `returnOrderColumnError: ${JSON.stringify(returnOrderColumnError)}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getNextReturnItem',
             });
             return [returnOrderColumnError, null];
@@ -90,7 +90,7 @@ class SharedService {
         if (returnItemOrderError) {
             logger.error({
                 message: `returnItemOrderError: ${JSON.stringify(returnItemOrderError)}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getNextReturnItem',
             });
             return [returnItemOrderError, null];
@@ -99,7 +99,7 @@ class SharedService {
         if (returnItemsError || !returnItems) {
             logger.error({
                 message: `returnItemsError: ${returnItemsError ? JSON.stringify(returnItemsError) : 'null'}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getNextReturnItem',
             });
             return [returnItemsError !== null && returnItemsError !== void 0 ? returnItemsError : new error_1.BadRequestError(), null];
@@ -118,7 +118,7 @@ class SharedService {
             if (!returnItems.length) {
                 logger.error({
                     message: 'no custom returnItems',
-                    fileName: 'integration service',
+                    fileName: 'shared servicee',
                     functionName: 'getNextReturnItem',
                 });
                 return [new error_1.InternalServerError(), null];
@@ -137,7 +137,7 @@ class SharedService {
         if (!returnItemsOrder.length) {
             logger.error({
                 message: 'no returnItemsOrder',
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getNextReturnItem',
             });
             return [new error_1.InternalServerError(), null];
@@ -149,7 +149,7 @@ class SharedService {
         if (nextReturnItemError) {
             logger.error({
                 message: `no matching item found from list, nextReturnItemId: ${nextReturnItemId}, sameTypeItems: ${JSON.stringify(returnItems)}`,
-                fileName: 'integration service',
+                fileName: 'shared service',
                 functionName: 'getNextReturnItem',
             });
             return [nextReturnItemError, null];

@@ -8,63 +8,19 @@ const error_1 = require("../types/errors/error");
 const logger = logger_service_1.LoggerService.getLogger();
 class SecretsService {
     constructor() {
-        logger.info({
-            message: 'start ctor',
-            fileName: 'secrets service',
-            functionName: 'constructor',
-        });
-        this.credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
+        const credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
         const url = `https://${process.env.KEY_VAULT_NAME}.vault.azure.net`;
-        this.client = new keyvault_secrets_1.SecretClient(url, this.credential);
-        logger.info({
-            message: 'initialized secrets service',
-            fileName: 'secrets service',
-            functionName: 'constructor',
-        });
+        this.client = new keyvault_secrets_1.SecretClient(url, credential);
     }
-    async setSecret(secretName, secretValue) {
-        try {
-            logger.info({
-                message: 'before setting secret',
-                fileName: 'secrets service',
-                functionName: 'setSecret',
-                data: `secret name: ${secretName}`,
-            });
-            const result = await this.client.setSecret(secretName, secretValue);
-            if (result && result.value) {
-                logger.info({
-                    message: 'success setting secret',
-                    fileName: 'secrets service',
-                    functionName: 'setSecret',
-                    data: `secret name: ${secretName}`,
-                });
-                return [null, result.value];
-            }
-            logger.info({
-                message: 'secret value is empty',
-                fileName: 'secrets service',
-                functionName: 'setSecret',
-                data: `secret: ${JSON.stringify(result)}`,
-            });
-            return [new error_1.InternalServerError(), null];
+    static getSecretsService() {
+        if (this.secretsServiceInstance) {
+            return this.secretsServiceInstance;
         }
-        catch (error) {
-            logger.error({
-                message: `catch: ${JSON.stringify(error)}`,
-                fileName: 'secrets service',
-                functionName: 'setSecret',
-            });
-            return [error, null];
-        }
+        this.secretsServiceInstance = new SecretsService();
+        return this.secretsServiceInstance;
     }
     async getSecret(secretName) {
         try {
-            logger.info({
-                message: 'before getting secret',
-                fileName: 'secrets service',
-                functionName: 'getSecret',
-                data: `secret name: ${secretName}`,
-            });
             const secret = await this.client.getSecret(secretName);
             if (secret && secret.value) {
                 logger.info({

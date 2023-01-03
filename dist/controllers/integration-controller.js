@@ -10,11 +10,15 @@ const shared_service_1 = require("../services/shared-service");
 const monday_1 = require("../utils/monday");
 const monday_service_1 = require("../services/monday-service");
 const sync_integration_values_1 = require("../constants/sync-integration-values");
+const cache_service_1 = require("../services/cache-service");
+const cache_1 = require("../constants/cache");
 const logger = logger_service_1.LoggerService.getLogger();
 const syncStatusAndTasks = async (request, response) => {
     var _a, _b;
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
+    const cacheService = new cache_service_1.CacheService();
+    cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
     const integrationService = new integration_service_1.IntegrationService();
     const mondayService = new monday_service_1.MondayService();
     const sharedService = new shared_service_1.SharedService();

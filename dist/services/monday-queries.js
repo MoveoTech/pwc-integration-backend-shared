@@ -68,6 +68,7 @@ exports.queries = {
         create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
             id
         }
+        complexity {before reset_in_x_seconds}
     }
   `,
     createNotification: `mutation($text: String!, $userId: Int!, $targetId: Int!) {

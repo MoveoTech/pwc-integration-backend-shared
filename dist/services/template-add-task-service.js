@@ -206,7 +206,7 @@ class TemplateAddTaskService {
             }
             return 'false';
         }));
-        if (createdItems.some(item => item === 'false')) {
+        if (createdItems.some((item) => item === 'false')) {
             logger.error({
                 message: `not all items created: ${JSON.stringify(createdItems)}`,
                 fileName: 'template add task service',
@@ -276,7 +276,7 @@ const sortItemsByColumnId = (items, columnId) => {
     return [null, sortedItems];
 };
 const findLastSubmissionItem = (items) => {
-    const lastItem = items.find(item => {
+    const lastItem = items.find((item) => {
         const columnValues = item.columns.reduce((a, v) => ({ ...a, [v.id]: v.text }), {});
         if ((columnValues[sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ADDED_BY_STATUS] === sync_integration_values_1.SYNC_INTEGRATION_VALUES.ADDED_BY_INTEGRATION &&
             columnValues[sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN] === sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS) ||
