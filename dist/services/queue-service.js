@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.QueueService = void 0;
 const service_bus_1 = require("@azure/service-bus");
-const identity_1 = require("@azure/identity");
 const logger_service_1 = require("./logger-service");
 const cache_service_1 = require("./cache-service");
 const cache_1 = require("../constants/cache");
@@ -12,6 +11,7 @@ const monday_service_1 = require("./monday-service");
 const logger = logger_service_1.LoggerService.getLogger();
 class QueueService {
     constructor() {
+        this.connectionString = process.env.SERVICE_BUS_CONNECTION_STRING || '';
         this.queueName = process.env.QUEUE_NAME || '';
         this.client = this.setClient();
         this.sender = this.setSender();
@@ -25,9 +25,13 @@ class QueueService {
         return this.queueServiceInstance;
     }
     setClient() {
-        const credential = new identity_1.ClientSecretCredential(process.env.AZURE_TENANT_ID || '', process.env.AZURE_CLIENT_ID || '', process.env.AZURE_CLIENT_SECRET || '');
-        const fullyQualifiedNamespace = `${process.env.SERVICE_BUS_NAMESPACE}.servicebus.windows.net`;
-        this.client = new service_bus_1.ServiceBusClient(fullyQualifiedNamespace, credential);
+        // const credential = new ClientSecretCredential(
+        //   process.env.AZURE_TENANT_ID || '',
+        //   process.env.AZURE_CLIENT_ID || '',
+        //   process.env.AZURE_CLIENT_SECRET || ''
+        // );
+        // const fullyQualifiedNamespace = `${process.env.SERVICE_BUS_NAMESPACE}.servicebus.windows.net`;
+        this.client = new service_bus_1.ServiceBusClient(this.connectionString);
         // console.log('queue client: ', JSON.stringify(this.client));
         return this.client;
     }
