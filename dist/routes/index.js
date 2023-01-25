@@ -8,8 +8,6 @@ const integration_routes_1 = __importDefault(require("./integration-routes"));
 const router = (0, express_1.Router)();
 router.get('/api/health', function (request, response) {
     response.json({
-        env: process.env.NODE_ENV,
-        appName: process.env.APP_NAME,
         version: '1.0',
         message: 'Health',
         ok: true,

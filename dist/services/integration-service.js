@@ -222,7 +222,7 @@ class IntegrationService {
             return [nextReturnItemError, null];
         }
         if (isItemCustomTemplate) {
-            const [templateIdError, templateId] = await (0, monday_1.getColumnTextByColumnId)(returnItemParent, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_DATE_TEMPLATE_COLUMN);
+            const [templateIdError, templateId] = (0, monday_1.getColumnTextByColumnId)(returnItemParent, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_DATE_TEMPLATE_COLUMN);
             if (templateIdError) {
                 logger.error({
                     message: `templateIdError: ${JSON.stringify(templateIdError)}`,
@@ -250,7 +250,34 @@ class IntegrationService {
             });
             return [submissionsDatesError, null];
         }
-        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate);
+        const [ownerNameError, ownerName] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN);
+        if (ownerNameError) {
+            logger.error({
+                message: `ownerNameError: ${JSON.stringify(ownerNameError)}`,
+                fileName: 'integration service',
+                functionName: 'buildNextTask',
+            });
+            return [ownerNameError, null];
+        }
+        const [ownerIdError, ownerId] = ownerName !== '' ? await this.mondayService.getUserIdByName(monAccessToken, ownerName) : [null, ownerName];
+        if (ownerIdError) {
+            logger.error({
+                message: `ownerIdError: ${JSON.stringify(ownerIdError)}`,
+                fileName: 'integration service',
+                functionName: 'buildNextTask',
+            });
+            return [ownerIdError, null];
+        }
+        const [regionError, region] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN);
+        if (regionError) {
+            logger.error({
+                message: `regionError: ${JSON.stringify(regionError)}`,
+                fileName: 'integration service',
+                functionName: 'buildNextTask',
+            });
+            return [regionError, null];
+        }
+        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerId.toString(), region);
         if (itemColumnsError) {
             logger.error({
                 message: `itemColumnsError: ${JSON.stringify(itemColumnsError)}`,

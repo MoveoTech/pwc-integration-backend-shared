@@ -29,6 +29,8 @@ exports.SYNC_INTEGRATION_COLUMNS = {
     TASK_TEMPLATE_BUDGETED_HOURS_COLUMN: 'numbers_1',
     TASK_TEMPLATE_SYNCED_COLUMN: 'status1',
     TASK_TEMPLATE_TYPE_COLUMN: 'status7',
+    TASK_OWNER_COLUMN: 'people',
+    TASK_REGION_COLUMN: 'color',
     // obligation columns
     OBLIGATION_SOURCE_COLUMN: 'status',
     OBLIGATION_PRODUCE_TASKS_COLUMN: 'status0',

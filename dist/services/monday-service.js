@@ -258,6 +258,36 @@ class MondayService {
         // return [new InternalServerError(), null];
         // // END LOCAL
     }
+    async getUserIdByName(monAccessToken, name) {
+        var _a, _b, _c, _d, _e, _f;
+        const query = monday_queries_1.queries.getUserId;
+        const variables = { name };
+        logger.info({
+            message: 'start',
+            fileName: 'monday service',
+            functionName: 'getUserIdByName',
+            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
+        });
+        const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
+        if (responseError) {
+            logger.error({
+                message: `responseError: ${JSON.stringify(responseError)}`,
+                fileName: 'monday service',
+                functionName: 'getUserIdByName',
+            });
+            return [responseError, null];
+        }
+        logger.info({
+            message: 'response',
+            fileName: 'monday service',
+            functionName: 'getUserIdByName',
+            data: `response: ${JSON.stringify(response === null || response === void 0 ? void 0 : response.data)}`,
+        });
+        if (((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.users) === null || _b === void 0 ? void 0 : _b.length) && ((_d = (_c = response === null || response === void 0 ? void 0 : response.data) === null || _c === void 0 ? void 0 : _c.users[0]) === null || _d === void 0 ? void 0 : _d.id)) {
+            return [null, (_f = (_e = response === null || response === void 0 ? void 0 : response.data) === null || _e === void 0 ? void 0 : _e.users[0]) === null || _f === void 0 ? void 0 : _f.id];
+        }
+        return [new error_1.InternalServerError(), null];
+    }
     createNotification(monAccessToken, boardId, userId, text) {
         const query = monday_queries_1.queries.createNotification;
         const variables = { text, userId, targetId: boardId };

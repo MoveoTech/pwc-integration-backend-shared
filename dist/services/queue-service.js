@@ -25,19 +25,11 @@ class QueueService {
         return this.queueServiceInstance;
     }
     setClient() {
-        // const credential = new ClientSecretCredential(
-        //   process.env.AZURE_TENANT_ID || '',
-        //   process.env.AZURE_CLIENT_ID || '',
-        //   process.env.AZURE_CLIENT_SECRET || ''
-        // );
-        // const fullyQualifiedNamespace = `${process.env.SERVICE_BUS_NAMESPACE}.servicebus.windows.net`;
         this.client = new service_bus_1.ServiceBusClient(this.connectionString);
-        // console.log('queue client: ', JSON.stringify(this.client));
         return this.client;
     }
     setSender() {
         this.sender = this.client.createSender(this.queueName);
-        // console.log('queue sender: ', JSON.stringify(this.sender));
         return this.sender;
     }
     setReceiver() {
@@ -48,7 +40,6 @@ class QueueService {
         }, {
             autoCompleteMessages: false,
         });
-        // console.log('queue receiver: ', JSON.stringify(this.receiver));
         return this.receiver;
     }
     async handleMessage(message) {

@@ -9,12 +9,7 @@ const monday_1 = require("./monday");
 const getRelatedItemsByTaskType = (item, sameTypeItems, taskType) => {
     switch (taskType) {
         case sync_integration_values_1.SYNC_INTEGRATION_VALUES.FILING_TASK_TYPE:
-            return filterItems(item, sameTypeItems, [
-                sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_BUSINESS_STREAM_ID_COLUMN,
-                sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_LEGAL_ENTITY_NAME_COLUMN,
-                sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_LEGAL_ENTITY_COUNTRY_COLUMN,
-                sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TAX_REGISTRATION_COLUMN,
-            ]);
+            return filterItems(item, sameTypeItems, [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN]);
         case sync_integration_values_1.SYNC_INTEGRATION_VALUES.DATA_TASK_TYPE:
             return filterItems(item, sameTypeItems, [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_BUSINESS_STREAM_ID_COLUMN]);
         default:

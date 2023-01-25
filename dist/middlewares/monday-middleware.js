@@ -25,7 +25,7 @@ const verifyAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'authorization error' });
         }
         // FROM AZURE KEY VAULT
-        const [mondaySigningSecretError, mondaySigningSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_SIGNING_SECRET);
+        const [mondaySigningSecretError, mondaySigningSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_SIGNING);
         if (mondaySigningSecretError) {
             logger.error({
                 message: 'missing monday signing secret',
@@ -106,7 +106,7 @@ const verifyClientAuthorization = async (request, response, next) => {
             return response.status(500).send({ error: 'authorization error' });
         }
         // FROM AZURE KEY VAULT
-        const [mondayClientSecretError, mondayClientSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_CLIENT_SECRET);
+        const [mondayClientSecretError, mondayClientSecret] = await secretsService.getSecret(secrets_1.SECRETS.MONDAY_CLIENT);
         if (mondayClientSecretError) {
             logger.error({
                 message: 'missing monday client secret',

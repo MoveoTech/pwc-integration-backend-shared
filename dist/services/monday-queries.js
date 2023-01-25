@@ -77,5 +77,11 @@ exports.queries = {
         }
     }
   `,
+    getUserId: `query ($name: String){
+      users (name: $name) {
+        id
+      }
+    }
+  `,
 };
 //# sourceMappingURL=monday-queries.js.map
