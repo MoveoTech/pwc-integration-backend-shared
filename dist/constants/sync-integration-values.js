@@ -15,11 +15,11 @@ exports.SYNC_INTEGRATION_VALUES = {
     ADDED_BY_INTEGRATION: 'True',
     IS_SYNCED_STATUS: 'True',
     IS_CREATED: 'True',
-    CALENDAR_DAY: 'Calendar day',
-    WORK_DAY: 'Workday',
+    CALENDAR_DAY: 'Calendar Day',
+    WORK_DAY: 'Working Day',
     WEEKEND_BEGINS_FRIDAY: 'Friday',
     WEEKEND_BEGINS_SATURDAY: 'Saturday',
-    WEEKEND_ROLL_BACKWARD: 'Roll Backward',
-    WEEKEND_ROLL_FORWARD: 'Roll Forward',
+    WEEKEND_ROLL_BACKWARD: 'Roll Backwards',
+    WEEKEND_ROLL_FORWARD: 'Roll Forwards',
 };
 //# sourceMappingURL=sync-integration-values.js.map
