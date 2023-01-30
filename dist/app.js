@@ -9,6 +9,7 @@ const express_1 = __importDefault(require("express"));
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
 const cors_1 = __importDefault(require("cors"));
+const body_parser_1 = __importDefault(require("body-parser"));
 const routes_1 = __importDefault(require("./routes"));
 const logger_service_1 = require("./services/logger-service");
 const logger = logger_service_1.LoggerService.getLogger();
@@ -16,6 +17,7 @@ const app = (0, express_1.default)();
 const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : '8080';
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
+app.use(body_parser_1.default.json({ limit: '20mb' }));
 app.use(express_1.default.urlencoded({
     extended: true,
 }));
