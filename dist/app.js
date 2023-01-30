@@ -18,6 +18,7 @@ const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : '8080';
 app.use((0, cors_1.default)());
 app.use(express_1.default.json());
 app.use(body_parser_1.default.json({ limit: '20mb' }));
+app.use(body_parser_1.default.urlencoded({ limit: '20mb', extended: true }));
 app.use(express_1.default.urlencoded({
     extended: true,
 }));

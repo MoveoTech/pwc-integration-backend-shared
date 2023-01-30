@@ -13,7 +13,7 @@ class ActivateTasksService {
     constructor() {
         this.mondayService = new monday_service_1.MondayService();
     }
-    async activateParentsItems(monAccessToken, userId, boardIds, parentsItemsData) {
+    async activateParentsItems(monAccessToken, userId, boardIds, parentsItemsData, isLastTasksGroup) {
         const activateTasksService = new ActivateTasksService();
         const sharedService = new shared_service_1.SharedService();
         const mondayService = new monday_service_1.MondayService();
@@ -71,7 +71,9 @@ class ActivateTasksService {
             functionName: 'activateParentsItems',
             data: `activatedParents: ${JSON.stringify(activatedParents)}`,
         });
-        sharedService.pushNotification(monAccessToken, +boardIds.businessStreamBoardId, userId, 'Business stream successfully activated');
+        if (isLastTasksGroup) {
+            sharedService.pushNotification(monAccessToken, +boardIds.businessStreamBoardId, userId, 'Business stream successfully activated');
+        }
     }
     async changeStatusByItemType(monAccessToken, boardIds, parentItemId, itemType) {
         let parentBoardId;

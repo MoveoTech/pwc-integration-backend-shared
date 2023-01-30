@@ -11,7 +11,7 @@ const validateActivateTasksInputs = async (request, response, next) => {
             fileName: 'activate tasks middleware',
             functionName: 'validateActivateTasksInputs',
         });
-        const { boardIds, parentsItemsData } = (_a = request === null || request === void 0 ? void 0 : request.body) === null || _a === void 0 ? void 0 : _a.payload;
+        const { boardIds, parentsItemsData, isLastTasksGroup } = (_a = request === null || request === void 0 ? void 0 : request.body) === null || _a === void 0 ? void 0 : _a.payload;
         if (!boardIds || !parentsItemsData || !parentsItemsData.length) {
             logger.error({
                 message: `no inputs in request payload: ${JSON.stringify((_b = request === null || request === void 0 ? void 0 : request.body) === null || _b === void 0 ? void 0 : _b.payload)}`,
@@ -23,6 +23,7 @@ const validateActivateTasksInputs = async (request, response, next) => {
         response.locals.inputs = {
             boardIds,
             parentsItemsData,
+            isLastTasksGroup,
         };
         logger.info({
             message: 'inputs success',
