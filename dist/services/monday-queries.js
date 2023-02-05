@@ -17,8 +17,8 @@ exports.queries = {
     }
   `,
     getItemsColumnValuesByBoardId: `query ($boardId: [Int]!, $page: Int!, $limit: Int!){
-    boards (ids: $boardId, page: $page, limit: $limit) {
-      items {
+    boards (ids: $boardId) {
+      items (page: $page, limit: $limit) {
         id
         name
         column_values {

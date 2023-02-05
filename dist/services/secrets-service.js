@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.SecretsService = void 0;
+// Comment the file for local run
 const keyvault_secrets_1 = require("@azure/keyvault-secrets");
 const identity_1 = require("@azure/identity");
 const logger_service_1 = require("./logger-service");
