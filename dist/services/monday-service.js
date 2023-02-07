@@ -97,6 +97,7 @@ class MondayService {
     }
     async queryItemsColumnsValuesByBoardId(monAccessToken, boardId) {
         var _a, _b;
+        const cacheService = cache_service_1.CacheService.getCacheService();
         const query = monday_queries_1.queries.getItemsColumnValuesByBoardId;
         let page = 1;
         const variables = { boardId, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
@@ -109,31 +110,51 @@ class MondayService {
         const itemsRes = [];
         let itemsResCount = 0;
         do {
-            const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
-            if (responseError) {
-                logger.error({
-                    message: `responseError: ${JSON.stringify(responseError)}`,
-                    fileName: 'monday service',
-                    functionName: 'queryItemsByColumnValue',
-                });
-                return [responseError, null];
+            const pageCacheKey = `${cache_1.CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
+            const cachedPageRes = cacheService.getKey(pageCacheKey);
+            if (!cachedPageRes) {
+                const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
+                if (responseError) {
+                    logger.error({
+                        message: `responseError: ${JSON.stringify(responseError)}`,
+                        fileName: 'monday service',
+                        functionName: 'queryItemsByColumnValue',
+                    });
+                    return [responseError, null];
+                }
+                itemsResCount = 0;
+                if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.boards) === null || _b === void 0 ? void 0 : _b.length) {
+                    itemsRes.push(...response.data.boards[0].items);
+                    itemsResCount = response.data.boards[0].items.length;
+                    cacheService.setKey(pageCacheKey, JSON.stringify(response.data.boards[0].items), cache_1.CACHE.ITEMS_BY_BOARD_ID_TTL);
+                }
             }
-            itemsResCount = 0;
-            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.boards) === null || _b === void 0 ? void 0 : _b.length) {
-                itemsRes.push(...response.data.boards[0].items);
-                itemsResCount = response.data.boards[0].items.length;
+            else {
+                const parsedPageRes = JSON.parse(cachedPageRes);
+                itemsRes.push(...parsedPageRes);
+                itemsResCount = parsedPageRes.length;
             }
             page++;
             variables.page = page;
         } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
         logger.info({
-            message: 'response',
+            message: 'response success',
             fileName: 'monday service',
             functionName: 'queryItemsByColumnValue',
-            data: `itemsRes: ${JSON.stringify(itemsRes)}`,
+            data: `itemsRes length: ${JSON.stringify(itemsRes.length)}`,
         });
         if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
-            return [null, (0, monday_1.mapToItems)(itemsRes)];
+            const resCacheKey = `${cache_1.CACHE.ITEMS_BY_BOARD_ID}_${boardId}`;
+            const cachedRes = cacheService.getKey(resCacheKey);
+            if (!cachedRes) {
+                const mappedRes = (0, monday_1.mapToItems)(itemsRes);
+                cacheService.setKey(resCacheKey, JSON.stringify(mappedRes), cache_1.CACHE.ITEMS_BY_BOARD_ID_TTL);
+                return [null, mappedRes];
+            }
+            else {
+                const parsedRes = JSON.parse(cachedRes);
+                return [null, parsedRes];
+            }
         }
         return [new error_1.InternalServerError(), null];
     }
