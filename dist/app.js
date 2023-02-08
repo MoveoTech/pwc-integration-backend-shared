@@ -11,6 +11,7 @@ dotenv_1.default.config();
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const routes_1 = __importDefault(require("./routes"));
+const configure_http_1 = require("./utils/configure-http");
 const logger_service_1 = require("./services/logger-service");
 const logger = logger_service_1.LoggerService.getLogger();
 const app = (0, express_1.default)();
@@ -25,6 +26,7 @@ app.use(express_1.default.urlencoded({
 app.use(routes_1.default);
 const main = async () => {
     try {
+        (0, configure_http_1.configureHttp)();
         app.listen(port, () => {
             logger.info({
                 message: `pwc integration app listening at http://localhost:${port}`,

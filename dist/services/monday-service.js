@@ -15,7 +15,9 @@ const logger_service_1 = require("./logger-service");
 const queue_service_1 = require("./queue-service");
 const cache_service_1 = require("./cache-service");
 const cache_1 = require("../constants/cache");
+const http_service_1 = require("./http-service");
 const logger = logger_service_1.LoggerService.getLogger();
+const mondayApiUrl = 'https://api.monday.com/v2';
 class MondayService {
     constructor() {
         this.mondayClient = (0, monday_sdk_js_1.default)();
@@ -52,73 +54,33 @@ class MondayService {
         }
         return [new error_1.InternalServerError(), null];
     }
-    async queryItemsByColumnValue(monAccessToken, boardId, columnId, columnValue) {
-        var _a, _b;
-        // TODO type for res
-        const query = monday_queries_1.queries.queryItemsByColumnValue;
-        let page = 1;
-        const variables = { boardId, columnId, columnValue, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
-        logger.info({
-            message: 'start',
-            fileName: 'monday service',
-            functionName: 'queryItemsByColumnValue',
-            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
-        });
-        const itemsRes = [];
-        let itemsResCount = 0;
-        do {
-            const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
-            if (responseError) {
-                logger.error({
-                    message: `responseError: ${JSON.stringify(responseError)}`,
-                    fileName: 'monday service',
-                    functionName: 'queryItemsByColumnValue',
-                });
-                return [responseError, null];
-            }
-            itemsResCount = 0;
-            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.items_by_column_values) === null || _b === void 0 ? void 0 : _b.length) {
-                itemsRes.push(...response.data.items_by_column_values);
-                itemsResCount = response.data.items_by_column_values.length;
-            }
-            page++;
-            variables.page = page;
-        } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
-        logger.info({
-            message: 'response',
-            fileName: 'monday service',
-            functionName: 'queryItemsByColumnValue',
-            data: `itemsRes: ${JSON.stringify(itemsRes)}`,
-        });
-        if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
-            return [null, (0, monday_1.mapToItems)(itemsRes)];
-        }
-        return [new error_1.InternalServerError(), null];
-    }
     async queryItemsColumnsValuesByBoardId(monAccessToken, boardId) {
         var _a, _b;
         const cacheService = cache_service_1.CacheService.getCacheService();
         const query = monday_queries_1.queries.getItemsColumnValuesByBoardId;
         let page = 1;
         const variables = { boardId, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
-        logger.info({
-            message: 'start',
-            fileName: 'monday service',
-            functionName: 'queryItemsColumnsValuesByBoardId',
-            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
-        });
         const itemsRes = [];
         let itemsResCount = 0;
         do {
+            logger.info({
+                message: 'start do',
+                fileName: 'monday service',
+                functionName: 'queryItemsColumnsValuesByBoardId',
+                data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
+            });
             const pageCacheKey = `${cache_1.CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
             const cachedPageRes = cacheService.getKey(pageCacheKey);
             if (!cachedPageRes) {
-                const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
+                const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
+                    query,
+                    variables: JSON.stringify(variables),
+                }));
                 if (responseError) {
                     logger.error({
                         message: `responseError: ${JSON.stringify(responseError)}`,
                         fileName: 'monday service',
-                        functionName: 'queryItemsByColumnValue',
+                        functionName: 'queryItemsColumnsValuesByBoardId',
                     });
                     return [responseError, null];
                 }
@@ -140,7 +102,7 @@ class MondayService {
         logger.info({
             message: 'response success',
             fileName: 'monday service',
-            functionName: 'queryItemsByColumnValue',
+            functionName: 'queryItemsColumnsValuesByBoardId',
             data: `itemsRes length: ${JSON.stringify(itemsRes.length)}`,
         });
         if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
@@ -321,63 +283,79 @@ class MondayService {
         this.executeQuery(monAccessToken, query, variables);
     }
     async executeQuery(monAccessToken, query, variables) {
-        try {
-            logger.info({
-                message: 'start',
-                fileName: 'monday service',
-                functionName: 'executeQuery',
-                data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
-            });
-            // check complexity
-            const complexityQuery = `query {complexity {before reset_in_x_seconds}}`;
-            const complexityRes = await this.mondayClient.api(complexityQuery, {
+        logger.info({
+            message: 'start',
+            fileName: 'monday service',
+            functionName: 'executeQuery',
+            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
+        });
+        const cacheService = cache_service_1.CacheService.getCacheService();
+        const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
+        if (!cachedComplexity) {
+            const [responseError, response] = await this.getQueryRes(query, {
                 token: monAccessToken,
                 variables,
             });
-            if (!complexityRes) {
+            if (responseError) {
                 logger.error({
-                    message: `complexity error: ${JSON.stringify(complexityRes)}`,
+                    message: `responseError: ${JSON.stringify(responseError)}`,
                     fileName: 'monday service',
                     functionName: 'executeQuery',
                 });
-                return [new error_1.BadRequestError(), null];
+                return [responseError, null];
             }
-            logger.info({
-                message: 'complexityRes',
-                fileName: 'monday service',
-                functionName: 'executeQuery',
-                data: `complexityRes: ${JSON.stringify(complexityRes)}`,
-            });
-            const { complexity } = complexityRes === null || complexityRes === void 0 ? void 0 : complexityRes.data;
-            const { before, reset_in_x_seconds } = complexity;
-            if (before < monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS) {
-                logger.info({
-                    message: 'complexity exceeded',
-                    fileName: 'monday service',
-                    functionName: 'executeQuery',
-                    data: `before: ${before}`,
-                });
-                await new Promise((r) => setTimeout(r, reset_in_x_seconds * 1000 || 60000));
-                const res = await this.executeQuery(monAccessToken, query, variables);
-                return [null, res];
-            }
-            const response = await this.mondayClient.api(query, {
+            return [null, response];
+        }
+        const complexity = JSON.parse(cachedComplexity);
+        if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < parseInt(complexity.before)) {
+            const [responseError, response] = await this.getQueryRes(query, {
                 token: monAccessToken,
                 variables,
             });
-            logger.info({
-                message: 'response',
+            if (responseError) {
+                logger.error({
+                    message: `responseError: ${JSON.stringify(responseError)}`,
+                    fileName: 'monday service',
+                    functionName: 'executeQuery',
+                });
+                return [responseError, null];
+            }
+            return [null, response];
+        }
+        logger.info({
+            message: 'complexity exceeded',
+            fileName: 'monday service',
+            functionName: 'executeQuery',
+            data: `before: ${complexity.before}`,
+        });
+        await new Promise((r) => setTimeout(r, complexity.reset_in_x_seconds * 1000 || 60000));
+        const [err, res] = await this.executeQuery(monAccessToken, query, variables);
+        if (err) {
+            logger.error({
+                message: `err: ${JSON.stringify(err)}`,
                 fileName: 'monday service',
                 functionName: 'executeQuery',
-                data: `response: ${JSON.stringify(response)}`,
             });
+            return [err, null];
+        }
+        return [null, res];
+    }
+    async getQueryRes(query, variables) {
+        var _a, _b;
+        try {
+            const response = await this.mondayClient.api(query, variables);
+            if ((response === null || response === void 0 ? void 0 : response.data) && ((_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.complexity)) {
+                const { complexity } = response === null || response === void 0 ? void 0 : response.data;
+                const cacheService = cache_service_1.CacheService.getCacheService();
+                cacheService.setKey(cache_1.CACHE.COMPLEXITY, JSON.stringify(complexity), (_b = complexity.reset_in_x_seconds) !== null && _b !== void 0 ? _b : 60);
+            }
             return [null, response];
         }
         catch (error) {
             logger.error({
                 message: `catch error: ${JSON.stringify(error)}`,
                 fileName: 'monday service',
-                functionName: 'executeQuery',
+                functionName: 'getQueryRes',
             });
             return [error, null];
         }
