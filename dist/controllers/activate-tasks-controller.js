@@ -14,7 +14,7 @@ const activateTasks = async (request, response) => {
     cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
     const activateTasksService = new activate_tasks_service_1.ActivateTasksService();
     activateTasksService.activateParentsItems(monAccessToken, userId, boardIds, parentsItemsData, isLastTasksGroup);
-    return response.status(200).send('success');
+    return response.status(200).send({ success: true });
 };
 exports.activateTasks = activateTasks;
 //# sourceMappingURL=activate-tasks-controller.js.map

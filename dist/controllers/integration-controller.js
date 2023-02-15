@@ -17,7 +17,7 @@ const syncStatusAndTasks = async (request, response) => {
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
     _syncStatusAndTasks(monAccessToken, itemId, boardId, userId);
-    return response.status(200).send();
+    return response.status(200).send({ success: true });
 };
 exports.syncStatusAndTasks = syncStatusAndTasks;
 const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {

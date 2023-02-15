@@ -17,7 +17,7 @@ const addTask = async (request, response) => {
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId, templateItemId, settingsBoardIds } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
     _addTask(monAccessToken, userId, boardId, itemId, templateItemId, settingsBoardIds);
-    return response.status(200).send();
+    return response.status(200).send({ success: true });
 };
 exports.addTask = addTask;
 const _addTask = async (monAccessToken, userId, boardId, itemId, templateItemId, settingsBoardIds) => {
