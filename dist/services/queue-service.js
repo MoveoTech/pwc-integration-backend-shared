@@ -56,24 +56,22 @@ class QueueService {
                     fileName: 'queue service',
                     functionName: 'handleMessage',
                 });
-                this.receiver.abandonMessage(message);
-                return;
+                return this.receiver.abandonMessage(message);
             }
             cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
         }
         const mondayService = new monday_service_1.MondayService();
-        const [resError] = await mondayService.executeQueryFromQueue(monAccessToken, query, variables);
+        const [resError, res] = await mondayService.executeQueryFromQueue(monAccessToken, query, variables);
         if (resError) {
             logger.error({
                 message: `resError: ${JSON.stringify(resError)}`,
                 fileName: 'queue service',
                 functionName: 'handleMessage',
             });
-            this.receiver.abandonMessage(message);
-            return;
+            return this.receiver.abandonMessage(message);
         }
         console.log('completeMessage');
-        this.receiver.completeMessage(message);
+        return this.receiver.completeMessage(message);
     }
     async handleMessageError(messageError) {
         logger.error({
