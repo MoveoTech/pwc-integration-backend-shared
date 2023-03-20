@@ -12,7 +12,7 @@ const sync_integration_values_1 = require("../constants/sync-integration-values"
 const monday_queries_1 = require("./monday-queries");
 const monday_1 = require("../utils/monday");
 const logger_service_1 = require("./logger-service");
-const queue_service_1 = require("./queue-service");
+const queue_1 = __importDefault(require("../utils/queue"));
 const cache_service_1 = require("./cache-service");
 const cache_1 = require("../constants/cache");
 const http_service_1 = require("./http-service");
@@ -21,7 +21,7 @@ const mondayApiUrl = 'https://api.monday.com/v2';
 class MondayService {
     constructor() {
         this.mondayClient = (0, monday_sdk_js_1.default)();
-        this.queueService = queue_service_1.QueueService.getQueueService();
+        this.queue = queue_1.default.getQueue();
     }
     async queryItemColumnsValues(monAccessToken, itemId) {
         var _a, _b, _c;
@@ -188,6 +188,7 @@ class MondayService {
         return [new error_1.InternalServerError(), null];
     }
     async createItem(monAccessToken, boardId, itemName, columnValues) {
+        var _a, _b, _c;
         const query = monday_queries_1.queries.createItem;
         const variables = { itemName, boardId, columnValues: JSON.stringify(columnValues) };
         logger.info({
@@ -201,13 +202,27 @@ class MondayService {
         const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
         if (!cachedComplexity) {
             console.log('no complexity, add to queue');
-            await this.queueService.addToQueue(query, variables);
+            await ((_a = this.queue) === null || _a === void 0 ? void 0 : _a.add('query', {
+                query,
+                variables,
+            }, {
+                jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
+                removeOnComplete: true,
+                removeOnFail: true,
+            }));
             return [null, 'success'];
         }
         const complexity = JSON.parse(cachedComplexity);
         if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < parseInt(complexity.before)) {
             console.log('no complexity error, add to queue: ', parseInt(complexity.before));
-            await this.queueService.addToQueue(query, variables);
+            await ((_b = this.queue) === null || _b === void 0 ? void 0 : _b.add('query', {
+                query,
+                variables,
+            }, {
+                jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
+                removeOnComplete: true,
+                removeOnFail: true,
+            }));
             return [null, 'success'];
         }
         const scheduleDate = new Date();
@@ -216,7 +231,15 @@ class MondayService {
         console.log('scheduleDate: ', JSON.stringify(scheduleDate));
         scheduleDate.setSeconds(scheduleDate.getSeconds() + parseInt(complexity.reset_in_x_seconds));
         console.log('scheduleDate with delay: ', JSON.stringify(scheduleDate));
-        await this.queueService.addToQueue(query, variables, scheduleDate);
+        await ((_c = this.queue) === null || _c === void 0 ? void 0 : _c.add('query', {
+            query,
+            variables,
+        }, {
+            jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
+            delay: complexity.reset_in_x_seconds * 1000,
+            removeOnComplete: true,
+            removeOnFail: true,
+        }));
         return [null, 'added with delay'];
         // END QUEUE FOR CREATION
         // // LOCAL

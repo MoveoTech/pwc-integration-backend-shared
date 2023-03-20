@@ -13,6 +13,9 @@ const body_parser_1 = __importDefault(require("body-parser"));
 const routes_1 = __importDefault(require("./routes"));
 const configure_http_1 = require("./utils/configure-http");
 const logger_service_1 = require("./services/logger-service");
+const queue_1 = __importDefault(require("./utils/queue"));
+const queue_service_1 = require("./services/queue-service");
+const queue_worker_service_1 = require("./services/queue-worker-service");
 const logger = logger_service_1.LoggerService.getLogger();
 const app = (0, express_1.default)();
 const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : '8080';
@@ -27,6 +30,18 @@ app.use(routes_1.default);
 const main = async () => {
     try {
         (0, configure_http_1.configureHttp)();
+        const queueConnection = {
+            port: Number(process.env.REDIS_PORT),
+            host: process.env.REDIS_HOST,
+            password: process.env.REDIS_PASS,
+            tls: {
+                servername: process.env.REDIS_HOST,
+            },
+        };
+        queue_1.default.setQueueConnection(queueConnection);
+        const queue = (0, queue_service_1.createQueue)();
+        queue_1.default.setQueue(queue);
+        (0, queue_worker_service_1.createWorker)();
         app.listen(port, () => {
             logger.info({
                 message: `pwc integration app listening at http://localhost:${port}`,
