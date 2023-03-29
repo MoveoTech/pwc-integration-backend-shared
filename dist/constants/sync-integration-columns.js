@@ -20,6 +20,7 @@ exports.SYNC_INTEGRATION_COLUMNS = {
     TASK_DUE_DATE_COLUMN: 'date_1',
     TASK_TEXT_COLUMN: 'text_10',
     TASK_ROLE_COLUMN: 'text_11',
+    TASK_ORDER_COLUMN: 'order',
     TASK_BUDGETED_HOURS_COLUMN: 'numbers_1',
     TASK_OBLIGATION_ID_COLUMN: 'text_12',
     TASK_ID_COLUMN: 'text_13',
@@ -29,6 +30,7 @@ exports.SYNC_INTEGRATION_COLUMNS = {
     TASK_TEMPLATE_BUDGETED_HOURS_COLUMN: 'numbers_1',
     TASK_TEMPLATE_SYNCED_COLUMN: 'status1',
     TASK_TEMPLATE_TYPE_COLUMN: 'status7',
+    TASK_TEMPLATE_ORDER_COLUMN: 'order',
     TASK_OWNER_COLUMN: 'people',
     TASK_REGION_COLUMN: 'color',
     // obligation columns
@@ -77,6 +79,7 @@ exports.SYNC_INTEGRATION_COLUMNS = {
     CUSTOM_FILING_TASK_DUE_DATE_COLUMN: 'numbers',
     CUSTOM_FILING_TASK_COLUMN: 'text',
     CUSTOM_FILING_TASK_BUDGETED_HOURS_COLUMN: 'numbers_1',
+    CUSTOM_FILING_TASK_ORDER_COLUMN: 'order',
     // data tasks columns
     DATA_TASK_RETURN_ORDER_COLUMN: 'text',
     DATA_TASK_DUE_DATE_COLUMN: 'numbers',

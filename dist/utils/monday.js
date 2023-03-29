@@ -56,6 +56,9 @@ const getColumnValue = (item, columnId) => {
 exports.getColumnValue = getColumnValue;
 const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, taskId, returnId, isItemCustomTemplate, isNewTask = false, ownerId = '', region = '') => {
     const taskRoleValue = (0, exports.getColumnValue)(currentTask, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_ROLE_COLUMN);
+    const taskOrderValue = (0, exports.getColumnValue)(currentTask, isItemCustomTemplate
+        ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_ORDER_COLUMN
+        : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_ORDER_COLUMN);
     const budgetedHoursValue = (0, exports.getColumnValue)(currentTask, isItemCustomTemplate
         ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_BUDGETED_HOURS_COLUMN
         : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_BUDGETED_HOURS_COLUMN);
@@ -89,6 +92,7 @@ const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, 
                 ? (0, exports.getColumnValue)(currentTask, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_COLUMN)
                 : currentTask.name,
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ROLE_COLUMN]: taskRoleValue,
+            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ORDER_COLUMN]: taskOrderValue,
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_BUDGETED_HOURS_COLUMN]: budgetedHoursValue,
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN]: taskType === sync_integration_values_1.SYNC_INTEGRATION_VALUES.FILING_TASK_TYPE ? parentItem.id : '',
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ID_COLUMN]: taskId.toString(),

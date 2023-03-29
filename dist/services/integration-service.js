@@ -19,7 +19,7 @@ class IntegrationService {
         this.sharedService = new shared_service_1.SharedService();
     }
     async syncNextStatus(monAccessToken, boardId, item, sameTypeItems, taskType) {
-        var _a;
+        var _a, _b, _c;
         const [relatedItemsError, relatedItems] = (0, integration_1.getRelatedItemsByTaskType)(item, sameTypeItems, taskType);
         if (relatedItemsError) {
             logger.error({
@@ -31,10 +31,14 @@ class IntegrationService {
         }
         const itemsDates = relatedItems.reduce((result, relatedItem) => {
             const taskDateColumn = relatedItem.columns.filter((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_DUE_DATE_COLUMN);
-            if (taskDateColumn.length) {
+            const taskOrderColumn = relatedItem.columns.filter((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ORDER_COLUMN);
+            const taskReturnIdColumn = relatedItem.columns.filter((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN);
+            if (taskDateColumn.length && taskOrderColumn.length && taskReturnIdColumn.length) {
                 result.push({
                     id: relatedItem.id,
                     taskDueDate: new Date(taskDateColumn[0].text),
+                    taskOrder: taskOrderColumn[0].text,
+                    taskReturnId: taskReturnIdColumn[0].text,
                 });
             }
             return result;
@@ -47,8 +51,10 @@ class IntegrationService {
             });
             return [new error_1.InternalServerError(), null];
         }
-        itemsDates.sort((a, b) => a.taskDueDate - b.taskDueDate);
+        itemsDates.sort((a, b) => a.taskDueDate - b.taskDueDate || +a.taskOrder - +b.taskOrder);
         const currentTaskDate = (_a = item.columns.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_DUE_DATE_COLUMN)) === null || _a === void 0 ? void 0 : _a.text;
+        const currentTaskOrder = (_b = item.columns.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ORDER_COLUMN)) === null || _b === void 0 ? void 0 : _b.text;
+        const currentTaskReturnId = (_c = item.columns.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN)) === null || _c === void 0 ? void 0 : _c.text;
         if (!currentTaskDate) {
             logger.error({
                 message: `no currentTaskDate, item columns: ${JSON.stringify(item === null || item === void 0 ? void 0 : item.columns)}`,
@@ -57,16 +63,48 @@ class IntegrationService {
             });
             return [new error_1.InternalServerError(), null];
         }
-        const filteredDates = itemsDates.filter((itemDate) => itemDate.taskDueDate >= new Date(currentTaskDate) && itemDate.id !== item.id);
-        if (!filteredDates.length) {
+        if (!currentTaskOrder) {
             logger.error({
-                message: `no filteredDates, itemsDates: ${itemsDates}, currentTaskDate: ${JSON.stringify(currentTaskDate)}`,
+                message: `no currentTaskOrder, item columns: ${JSON.stringify(item === null || item === void 0 ? void 0 : item.columns)}`,
                 fileName: 'integration service',
                 functionName: 'syncNextStatus',
             });
             return [new error_1.InternalServerError(), null];
         }
-        const [itemStatusError, itemStatus] = await this.mondayService.changeItemStatus(monAccessToken, boardId, parseInt(filteredDates[0].id), sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN, sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS);
+        if (!currentTaskReturnId) {
+            logger.error({
+                message: `no currentTaskReturnId, item columns: ${JSON.stringify(item === null || item === void 0 ? void 0 : item.columns)}`,
+                fileName: 'integration service',
+                functionName: 'syncNextStatus',
+            });
+            return [new error_1.InternalServerError(), null];
+        }
+        const currentTaskDateObj = new Date(currentTaskDate);
+        const filterFutureTasks = itemsDates.filter((itemDate) => itemDate.taskDueDate >= currentTaskDateObj && itemDate.id !== item.id);
+        const filterRelevantTasks = filterFutureTasks.filter((itemData) => itemData.taskDueDate > currentTaskDateObj ||
+            (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
+                itemData.taskOrder > currentTaskOrder &&
+                itemData.taskReturnId === currentTaskReturnId) ||
+            (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
+                itemData.taskReturnId !== currentTaskReturnId));
+        if (!filterRelevantTasks.length) {
+            logger.error({
+                message: `no relevant tasks, itemsDates: ${itemsDates}, currentTaskDate: ${JSON.stringify(currentTaskDate)}`,
+                fileName: 'integration service',
+                functionName: 'syncNextStatus',
+            });
+            return [new error_1.InternalServerError(), null];
+        }
+        let nextActiveItem = filterRelevantTasks[0];
+        let filteredTasksBySameDate = filterRelevantTasks.filter((i) => i.taskDueDate.getTime() === nextActiveItem.taskDueDate.getTime());
+        const filteredSameReturnId = filteredTasksBySameDate.filter((itemData) => itemData.taskReturnId === currentTaskReturnId);
+        if (filteredSameReturnId.length) {
+            nextActiveItem = filteredSameReturnId[0];
+        }
+        else {
+            nextActiveItem = filteredTasksBySameDate[0];
+        }
+        const [itemStatusError, itemStatus] = await this.mondayService.changeItemStatus(monAccessToken, boardId, parseInt(nextActiveItem.id), sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN, sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS);
         if (itemStatusError) {
             logger.error({
                 message: `itemStatusError: ${JSON.stringify(itemStatusError)}`,
@@ -76,7 +114,7 @@ class IntegrationService {
             return [itemStatusError, null];
         }
         if (itemStatus) {
-            return [null, filteredDates[0].id];
+            return [null, nextActiveItem.id];
         }
         return [new error_1.InternalServerError(), null];
     }
