@@ -367,6 +367,7 @@ class MondayService {
         var _a, _b;
         try {
             const response = await this.mondayClient.api(query, variables);
+            console.log(response);
             if ((response === null || response === void 0 ? void 0 : response.data) && ((_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.complexity)) {
                 const { complexity } = response === null || response === void 0 ? void 0 : response.data;
                 const cacheService = cache_service_1.CacheService.getCacheService();
@@ -396,6 +397,7 @@ class MondayService {
                 token: monAccessToken,
                 variables,
             });
+            console.log(response);
             if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
                 (response === null || response === void 0 ? void 0 : response.error_code) ||
                 ((_a = response === null || response === void 0 ? void 0 : response.errors) === null || _a === void 0 ? void 0 : _a.length) > 0) {
