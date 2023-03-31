@@ -13,7 +13,7 @@ const createQueue = () => {
     const queue = new bullmq_1.Queue('queriesQueue', {
         connection,
         defaultJobOptions: {
-            attempts: 120,
+            attempts: 240,
             backoff: {
                 type: 'fixed',
                 delay: 60000,
