@@ -208,7 +208,7 @@ class MondayService {
             }, {
                 jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
                 removeOnComplete: true,
-                removeOnFail: { age: 180, count: 10 },
+                removeOnFail: { age: 24 * 3600, count: 5000 },
             }));
             return [null, 'success'];
         }
@@ -221,7 +221,7 @@ class MondayService {
             }, {
                 jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
                 removeOnComplete: true,
-                removeOnFail: { age: 180, count: 10 },
+                removeOnFail: { age: 24 * 3600, count: 5000 },
             }));
             return [null, 'success'];
         }
@@ -238,7 +238,7 @@ class MondayService {
             jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${variables === null || variables === void 0 ? void 0 : variables.itemName}`,
             delay: complexity.reset_in_x_seconds * 1000,
             removeOnComplete: true,
-            removeOnFail: { age: 180, count: 10 },
+            removeOnFail: { age: 24 * 3600, count: 5000 },
         }));
         return [null, 'added with delay'];
         // END QUEUE FOR CREATION
