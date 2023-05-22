@@ -289,6 +289,7 @@ class IntegrationService {
             return [submissionsDatesError, null];
         }
         const [ownerNameError, ownerName] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN);
+        const owners = ownerName === null || ownerName === void 0 ? void 0 : ownerName.split(', ');
         if (ownerNameError) {
             logger.error({
                 message: `ownerNameError: ${JSON.stringify(ownerNameError)}`,
@@ -297,7 +298,9 @@ class IntegrationService {
             });
             return [ownerNameError, null];
         }
-        const [ownerIdError, ownerId] = ownerName !== '' ? await this.mondayService.getUserIdByName(monAccessToken, ownerName) : [null, ownerName];
+        const [ownerIdError, ownerIds] = owners
+            ? await this.mondayService.getUserIdByName(monAccessToken, owners)
+            : [null, owners];
         if (ownerIdError) {
             logger.error({
                 message: `ownerIdError: ${JSON.stringify(ownerIdError)}`,
@@ -306,6 +309,7 @@ class IntegrationService {
             });
             return [ownerIdError, null];
         }
+        const ownersIds = { personsAndTeams: ownerIds };
         const [regionError, region] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN);
         if (regionError) {
             logger.error({
@@ -315,7 +319,7 @@ class IntegrationService {
             });
             return [regionError, null];
         }
-        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerId.toString(), region);
+        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownersIds, region);
         if (itemColumnsError) {
             logger.error({
                 message: `itemColumnsError: ${JSON.stringify(itemColumnsError)}`,
