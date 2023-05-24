@@ -43,16 +43,11 @@ class SharedService {
         const [itemsError, items] = await this.mondayService.queryItemsColumnsValuesByBoardId(monAccessToken, boardId);
         if ((items === null || items === void 0 ? void 0 : items.length) === 0 || itemsError) {
             logger.error({
-                message: (items === null || items === void 0 ? void 0 : items.length) === 0
-                    ? 'no items'
-                    : `itemsError: ${JSON.stringify(itemsError)}`,
+                message: (items === null || items === void 0 ? void 0 : items.length) === 0 ? 'no items' : `itemsError: ${JSON.stringify(itemsError)}`,
                 fileName: 'shared service',
                 functionName: 'getSameTypeItems',
             });
-            return [
-                (items === null || items === void 0 ? void 0 : items.length) === 0 ? new error_1.BadRequestError() : itemsError !== null && itemsError !== void 0 ? itemsError : new error_1.InternalServerError(),
-                null,
-            ];
+            return [(items === null || items === void 0 ? void 0 : items.length) === 0 ? new error_1.BadRequestError() : itemsError !== null && itemsError !== void 0 ? itemsError : new error_1.InternalServerError(), null];
         }
         const [sameTypeItemsError, sameTypeItems] = (0, monday_1.filterItemsByColumnValue)(items, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN, taskType);
         if ((sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 || sameTypeItemsError) {

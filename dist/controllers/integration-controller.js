@@ -16,7 +16,15 @@ const syncStatusAndTasks = async (request, response) => {
     var _a, _b;
     const { monAccessToken, userId } = (_a = response === null || response === void 0 ? void 0 : response.locals) === null || _a === void 0 ? void 0 : _a.mondayAuthorization;
     const { boardId, itemId } = (_b = response === null || response === void 0 ? void 0 : response.locals) === null || _b === void 0 ? void 0 : _b.inputs;
-    _syncStatusAndTasks(monAccessToken, itemId, boardId, userId);
+    let res = await _syncStatusAndTasks(monAccessToken, itemId, boardId, userId);
+    if (res instanceof Error) {
+        logger.error({
+            message: `Failed to complete, retrying... `,
+            fileName: 'integration controller',
+            functionName: 'syncStatusAndTasks',
+        });
+        return response.status(400).send({ success: false });
+    }
     return response.status(200).send({ success: true });
 };
 exports.syncStatusAndTasks = syncStatusAndTasks;
@@ -29,12 +37,12 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
     const [taskTypeError, taskType] = await sharedService.getTaskType(monAccessToken, itemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN);
     if (taskTypeError) {
         sharedService.pushNotification(monAccessToken, boardId, userId, errors_1.ERRORS.GENERIC_ERROR);
-        return;
+        return new Error();
     }
     const [sameTypeItemsError, sameTypeItems] = await sharedService.getSameTypeItems(monAccessToken, boardId, taskType);
     if (sameTypeItemsError) {
         sharedService.pushNotification(monAccessToken, boardId, userId, errors_1.ERRORS.GENERIC_ERROR);
-        return;
+        return new Error();
     }
     const [itemError, item] = (0, monday_1.getItemFromListById)(itemId, sameTypeItems);
     if (itemError) {
@@ -43,7 +51,7 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
             fileName: 'integration controller',
             functionName: 'syncStatusAndTasks',
         });
-        return [itemError, null];
+        return new Error();
     }
     logger.info({
         message: 'item found',
@@ -60,7 +68,7 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
             ? errors_1.ERRORS.INTEGRATION_SYNC_NEXT_STATUS_ERROR
             : errors_1.ERRORS.INTEGRATION_CREATE_NEXT_ITEM_ERROR;
         sharedService.pushNotification(monAccessToken, boardId, userId, message);
-        return;
+        return new Error(message);
     }
     logger.info({
         message: 'syncStatusAndTasks success',

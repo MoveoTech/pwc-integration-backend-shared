@@ -406,7 +406,7 @@ class MondayService {
             if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
                 (response === null || response === void 0 ? void 0 : response.error_code) ||
                 ((_a = response === null || response === void 0 ? void 0 : response.errors) === null || _a === void 0 ? void 0 : _a.length) > 0) {
-                return [new error_1.InternalServerError(), null];
+                return [new error_1.InternalServerError(response.error_code), null];
             }
             if ((response === null || response === void 0 ? void 0 : response.data) && ((_b = response === null || response === void 0 ? void 0 : response.data) === null || _b === void 0 ? void 0 : _b.complexity)) {
                 const { complexity } = response === null || response === void 0 ? void 0 : response.data;

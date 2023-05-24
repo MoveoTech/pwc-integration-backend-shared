@@ -30,7 +30,7 @@ const worker = async (job) => {
     const [resError, res] = await mondayService.executeQueryFromQueue(monAccessToken, query, variables);
     if (resError) {
         logger.error({
-            message: `resError: ${JSON.stringify(resError)}`,
+            message: `resError: ${JSON.stringify(resError.message)}`,
             fileName: 'queue worker',
             functionName: 'worker',
         });
