@@ -6,6 +6,7 @@ var ErrorType;
     ErrorType["BAD_REQUEST_ERROR"] = "BadRequestError";
     ErrorType["INTERNAL_SERVER_ERROR"] = "InternalServerError";
     ErrorType["FORBIDDEN_ERROR"] = "ForbiddenError";
+    ErrorType["TIMEOUT_ERROR"] = "TimeOutError";
 })(ErrorType = exports.ErrorType || (exports.ErrorType = {}));
 class GenericError extends Error {
 }

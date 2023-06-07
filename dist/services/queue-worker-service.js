@@ -40,7 +40,8 @@ const handleFail = async (job, error) => {
     });
     if ((job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.INVALID_EXPIRE_TIME ||
         (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.RETRY_JOB_OF_UNDEFINED ||
-        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.COULD_NOT_FIND_PROJECT) {
+        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.COULD_NOT_FIND_PROJECT ||
+        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.COLUMN_VALUE_EXCEPTION) {
         await job.remove();
     }
     else if ((job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.BOARD_MAX_SIZE ||

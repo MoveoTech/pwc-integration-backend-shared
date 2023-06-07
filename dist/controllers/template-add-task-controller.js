@@ -2,15 +2,12 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.addTask = void 0;
 const error_1 = require("../types/errors/error");
-const errors_1 = require("../constants/errors");
 const logger_service_1 = require("../services/logger-service");
 const sync_integration_columns_1 = require("../constants/sync-integration-columns");
 const template_add_task_service_1 = require("../services/template-add-task-service");
 const shared_service_1 = require("../services/shared-service");
 const monday_service_1 = require("../services/monday-service");
 const sync_integration_values_1 = require("../constants/sync-integration-values");
-const cache_service_1 = require("../services/cache-service");
-const cache_1 = require("../constants/cache");
 const logger = logger_service_1.LoggerService.getLogger();
 const addTask = async (request, response) => {
     var _a, _b;
@@ -21,25 +18,25 @@ const addTask = async (request, response) => {
 };
 exports.addTask = addTask;
 const _addTask = async (monAccessToken, userId, boardId, itemId, templateItemId, settingsBoardIds) => {
-    const cacheService = cache_service_1.CacheService.getCacheService();
-    cacheService.setKey(cache_1.CACHE.MONDAY_TOKEN, monAccessToken, cache_1.CACHE.MONDAY_TOKEN_TTL);
+    // const cacheService = CacheService.getCacheService();
+    // cacheService.setKey(CACHE.MONDAY_TOKEN, monAccessToken, CACHE.MONDAY_TOKEN_TTL);
     const sharedService = new shared_service_1.SharedService();
     const mondayService = new monday_service_1.MondayService();
     const templateAddTaskService = new template_add_task_service_1.TemplateAddTaskService();
     const [templateTaskError, templateTask] = await templateAddTaskService.getTemplateTask(monAccessToken, itemId);
     if (templateTaskError) {
-        sharedService.pushNotification(monAccessToken, boardId, userId, errors_1.ERRORS.GENERIC_ERROR);
+        // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;
     }
-    const [taskTypeError, taskType] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
+    const [taskTypeError, { taskType, obligationId }] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
     if (taskTypeError) {
-        sharedService.pushNotification(monAccessToken, boardId, userId, errors_1.ERRORS.GENERIC_ERROR);
+        // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;
     }
     await Promise.all(settingsBoardIds.map(async (boardIds) => {
         const [[sameTypeItemsError, sameTypeItems], [taskParentsItemsError, taskParentsItems]] = await Promise.all([
-            sharedService.getSameTypeItems(monAccessToken, +boardIds.currentTaskboardBoardId, taskType),
-            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString()),
+            sharedService.getSameTypeItems(monAccessToken, +boardIds.currentTaskboardBoardId, taskType, obligationId),
+            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString(), obligationId),
         ]);
         if ((sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 || sameTypeItemsError) {
             logger.error({

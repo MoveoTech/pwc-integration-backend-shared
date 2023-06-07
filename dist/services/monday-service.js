@@ -16,6 +16,7 @@ const queue_1 = __importDefault(require("../utils/queue"));
 const cache_service_1 = require("./cache-service");
 const cache_1 = require("../constants/cache");
 const http_service_1 = require("./http-service");
+const sync_integration_columns_1 = require("../constants/sync-integration-columns");
 const logger = logger_service_1.LoggerService.getLogger();
 const mondayApiUrl = 'https://api.monday.com/v2';
 class MondayService {
@@ -54,12 +55,16 @@ class MondayService {
         }
         return [new error_1.InternalServerError(), null];
     }
-    async queryItemsColumnsValuesByBoardId(monAccessToken, boardId) {
+    async queryItemsColumnsValuesByObligationId(monAccessToken, boardId, obligationId, taskType) {
         var _a, _b;
-        const cacheService = cache_service_1.CacheService.getCacheService();
-        const query = monday_queries_1.queries.getItemsColumnValuesByBoardId;
+        // const cacheService = CacheService.getCacheService();
+        const query = monday_queries_1.queries.queryItemsByColumnValue;
         let page = 1;
-        const variables = { boardId, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
+        let columnId = obligationId !== ''
+            ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN
+            : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN;
+        let columnValue = obligationId !== '' ? obligationId : taskType;
+        const variables = { boardId, columnId, columnValue, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
         const itemsRes = [];
         let itemsResCount = 0;
         do {
@@ -69,33 +74,36 @@ class MondayService {
                 functionName: 'queryItemsColumnsValuesByBoardId',
                 data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
             });
-            const pageCacheKey = `${cache_1.CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
-            const cachedPageRes = cacheService.getKey(pageCacheKey);
-            if (!cachedPageRes) {
-                const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
-                    query,
-                    variables: JSON.stringify(variables),
-                }));
-                if (responseError) {
-                    logger.error({
-                        message: `responseError: ${JSON.stringify(responseError)}`,
-                        fileName: 'monday service',
-                        functionName: 'queryItemsColumnsValuesByBoardId',
-                    });
-                    return [responseError, null];
-                }
-                itemsResCount = 0;
-                if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.boards) === null || _b === void 0 ? void 0 : _b.length) {
-                    itemsRes.push(...response.data.boards[0].items);
-                    itemsResCount = response.data.boards[0].items.length;
-                    cacheService.setKey(pageCacheKey, JSON.stringify(response.data.boards[0].items), cache_1.CACHE.ITEMS_BY_BOARD_ID_TTL);
-                }
+            // const pageCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
+            // const cachedPageRes = cacheService.getKey(pageCacheKey);
+            // if (!cachedPageRes) {
+            const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
+                query,
+                variables: JSON.stringify(variables),
+            }));
+            if (responseError) {
+                logger.error({
+                    message: `responseError: ${JSON.stringify(responseError)}`,
+                    fileName: 'monday service',
+                    functionName: 'queryItemsColumnsValuesByBoardId',
+                });
+                return [responseError, null];
             }
-            else {
-                const parsedPageRes = JSON.parse(cachedPageRes);
-                itemsRes.push(...parsedPageRes);
-                itemsResCount = parsedPageRes.length;
+            itemsResCount = 0;
+            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.items_by_column_values) === null || _b === void 0 ? void 0 : _b.length) {
+                itemsRes.push(...response.data.items_by_column_values);
+                itemsResCount = response.data.items_by_column_values.length;
+                // cacheService.setKey(
+                //   pageCacheKey,
+                //   JSON.stringify(response.data.items_by_column_values.items),
+                //   CACHE.ITEMS_BY_BOARD_ID_TTL
+                // );
             }
+            // } else {
+            //   const parsedPageRes = JSON.parse(cachedPageRes);
+            //   itemsRes.push(...parsedPageRes);
+            //   itemsResCount = parsedPageRes.length;
+            // }
             page++;
             variables.page = page;
         } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
@@ -106,17 +114,16 @@ class MondayService {
             data: `itemsRes length: ${JSON.stringify(itemsRes.length)}`,
         });
         if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
-            const resCacheKey = `${cache_1.CACHE.ITEMS_BY_BOARD_ID}_${boardId}`;
-            const cachedRes = cacheService.getKey(resCacheKey);
-            if (!cachedRes) {
-                const mappedRes = (0, monday_1.mapToItems)(itemsRes);
-                cacheService.setKey(resCacheKey, JSON.stringify(mappedRes), cache_1.CACHE.ITEMS_BY_BOARD_ID_TTL);
-                return [null, mappedRes];
-            }
-            else {
-                const parsedRes = JSON.parse(cachedRes);
-                return [null, parsedRes];
-            }
+            // const resCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}`;
+            // const cachedRes = cacheService.getKey(resCacheKey);
+            // if (!cachedRes) {
+            const mappedRes = (0, monday_1.mapToItems)(itemsRes);
+            // cacheService.setKey(resCacheKey, JSON.stringify(mappedRes), CACHE.ITEMS_BY_BOARD_ID_TTL);
+            return [null, mappedRes];
+            // } else {
+            //   const parsedRes = JSON.parse(cachedRes);
+            //   return [null, parsedRes];
+            // }
         }
         return [new error_1.InternalServerError(), null];
     }

@@ -34,7 +34,7 @@ const worker = async (job) => {
             fileName: 'queue worker',
             functionName: 'worker',
         });
-        throw new Error('throw worker, res error');
+        throw new Error(resError.message);
     }
     logger.info({
         message: 'completeMessage',
