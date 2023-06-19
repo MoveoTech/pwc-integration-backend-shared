@@ -28,15 +28,15 @@ const _addTask = async (monAccessToken, userId, boardId, itemId, templateItemId,
         // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;
     }
-    const [taskTypeError, { taskType, obligationId }] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
+    const [taskTypeError, { taskType }] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
     if (taskTypeError) {
         // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;
     }
     await Promise.all(settingsBoardIds.map(async (boardIds) => {
         const [[sameTypeItemsError, sameTypeItems], [taskParentsItemsError, taskParentsItems]] = await Promise.all([
-            sharedService.getSameTypeItems(monAccessToken, +boardIds.currentTaskboardBoardId, taskType, obligationId),
-            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString(), obligationId),
+            sharedService.getSameTypeItems(monAccessToken, +boardIds.currentTaskboardBoardId, taskType, null, true),
+            templateAddTaskService.getParentsItemsByType(monAccessToken, boardIds, taskType, templateItemId.toString()),
         ]);
         if ((sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 || sameTypeItemsError) {
             logger.error({
@@ -110,7 +110,7 @@ const _addTask = async (monAccessToken, userId, boardId, itemId, templateItemId,
         return [itemStatusError, null];
     }
     if (itemStatus) {
-        sharedService.pushNotification(monAccessToken, boardId, userId, `Task "${templateTask.name}" created successfully`);
+        // sharedService.pushNotification(monAccessToken, boardId, userId, `Task "${templateTask.name}" created successfully`);
     }
 };
 //# sourceMappingURL=template-add-task-controller.js.map

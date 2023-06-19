@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ForbiddenError = exports.InternalServerError = exports.BadRequestError = exports.GenericError = exports.ErrorType = void 0;
+exports.TimeOutError = exports.ForbiddenError = exports.InternalServerError = exports.BadRequestError = exports.GenericError = exports.ErrorType = void 0;
 var ErrorType;
 (function (ErrorType) {
     ErrorType["BAD_REQUEST_ERROR"] = "BadRequestError";
@@ -32,4 +32,11 @@ class ForbiddenError extends GenericError {
     }
 }
 exports.ForbiddenError = ForbiddenError;
+class TimeOutError extends GenericError {
+    constructor() {
+        super(...arguments);
+        this.type = ErrorType.TIMEOUT_ERROR;
+    }
+}
+exports.TimeOutError = TimeOutError;
 //# sourceMappingURL=error.js.map

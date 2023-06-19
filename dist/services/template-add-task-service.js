@@ -28,7 +28,7 @@ class TemplateAddTaskService {
         }
         return [null, templateTask];
     }
-    async getParentsItemsByType(monAccessToken, boardIds, taskType, templateId, obligationId) {
+    async getParentsItemsByType(monAccessToken, boardIds, taskType, templateId) {
         let definitionBoardId;
         let produceTasksColumnId;
         let taskTemplateColumnId;
@@ -49,7 +49,7 @@ class TemplateAddTaskService {
             default:
                 return [new error_1.BadRequestError(), null];
         }
-        const [itemsError, items] = await this.mondayService.queryItemsColumnsValuesByObligationId(monAccessToken, definitionBoardId, obligationId, taskType);
+        const [itemsError, items] = await this.mondayService.getItemsColumnValuesByBoardId(monAccessToken, definitionBoardId);
         if (itemsError) {
             logger.error({
                 message: `itemsError: ${JSON.stringify(itemsError)}`,

@@ -16,8 +16,12 @@ const createWorker = () => {
     cacheService = new cache_service_1.CacheService();
     const connection = queue_1.default.getQueueConnection();
     const workerInstance = new bullmq_1.Worker('queriesQueue', queue_worker_1.worker, {
-        concurrency: 10,
+        concurrency: 1,
         connection,
+        limiter: {
+            duration: 500,
+            max: 1,
+        },
     });
     workerInstance.on('completed', handleComplete);
     workerInstance.on('failed', handleFail);

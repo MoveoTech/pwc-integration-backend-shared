@@ -14,7 +14,7 @@ exports.queries = {
           text
         }
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     getItemsColumnValuesByBoardId: `query ($boardId: [Int]!, $page: Int!, $limit: Int!){
@@ -28,7 +28,7 @@ exports.queries = {
         }
       }
     }
-    complexity { before reset_in_x_seconds }
+    complexity { before reset_in_x_seconds after }
   }`,
     queryItemsByColumnValue: `query($boardId: Int!, $columnId: String!, $columnValue: String!, $page: Int!, $limit: Int!) {
       items_by_column_values(board_id: $boardId, column_id: $columnId, column_value: $columnValue, page: $page, limit: $limit) {
@@ -42,7 +42,7 @@ exports.queries = {
             text
         }
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     querySubItems: `query($itemId: [Int]) {
@@ -59,35 +59,35 @@ exports.queries = {
           }
         }
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     changeItemColumnValue: `mutation($boardId: Int!, $itemId: Int!, $columnValues: JSON!) {
       change_multiple_column_values (board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
           id
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     createItem: `mutation($boardId: Int!, $itemName: String!, $columnValues: JSON) {
       create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
           id
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     createNotification: `mutation($text: String!, $userId: Int!, $targetId: Int!) {
       create_notification (user_id: $userId, target_id: $targetId, text: $text, target_type: Project) {
           text
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
     getUserId: `query ($name: String){
       users (name: $name) {
         id
       }
-      complexity { before reset_in_x_seconds }
+      complexity { before reset_in_x_seconds after }
     }
   `,
 };

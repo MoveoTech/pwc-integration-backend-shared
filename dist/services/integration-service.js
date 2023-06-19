@@ -212,7 +212,7 @@ class IntegrationService {
                 fileName: 'integration service',
                 functionName: 'buildNextTask',
             });
-            return [new error_1.InternalServerError(), null];
+            return [currentTaskError, null];
         }
         if (!(currentReturnItem === null || currentReturnItem === void 0 ? void 0 : currentReturnItem.parentItemId)) {
             logger.error({
@@ -220,7 +220,7 @@ class IntegrationService {
                 fileName: 'integration service',
                 functionName: 'buildNextTask',
             });
-            return [new error_1.InternalServerError(), null];
+            return [currentReturnItemError, null];
         }
         let [returnItemParentError, returnItemParent] = await this.mondayService.queryItemColumnsValues(monAccessToken, parseInt(currentReturnItem === null || currentReturnItem === void 0 ? void 0 : currentReturnItem.parentItemId));
         if (returnItemParentError || !returnItemParent) {
