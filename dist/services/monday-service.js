@@ -452,26 +452,21 @@ class MondayService {
             const cacheService = cache_service_1.CacheService.getCacheService();
             const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
             const complexity = JSON.parse(cachedComplexity);
-            if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS_FOR_COMPLETE_MUTATION_FLOW < parseInt(complexity.before)) {
-                for (let index = 0; index < messages.length; index++) {
-                    const response = await this.mondayClient.api(messages[index].query, {
-                        token: monAccessToken,
-                        variables: messages[index].variables,
-                    });
-                    if ((response === null || response === void 0 ? void 0 : response.data) && ((_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.complexity)) {
-                        const { complexity } = response === null || response === void 0 ? void 0 : response.data;
-                        cacheService.setKey(cache_1.CACHE.COMPLEXITY, JSON.stringify(complexity), (_b = complexity.reset_in_x_seconds) !== null && _b !== void 0 ? _b : 60);
-                    }
-                    if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
-                        (response === null || response === void 0 ? void 0 : response.error_code) ||
-                        ((_c = response === null || response === void 0 ? void 0 : response.errors) === null || _c === void 0 ? void 0 : _c.length) > 0) {
-                        console.log('error', response.status_code);
-                        return [new error_1.InternalServerError(response.error_code), null];
-                    }
+            for (let index = 0; index < messages.length; index++) {
+                const response = await this.mondayClient.api(messages[index].query, {
+                    token: monAccessToken,
+                    variables: messages[index].variables,
+                });
+                if ((response === null || response === void 0 ? void 0 : response.data) && ((_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.complexity)) {
+                    const { complexity } = response === null || response === void 0 ? void 0 : response.data;
+                    cacheService.setKey(cache_1.CACHE.COMPLEXITY, JSON.stringify(complexity), (_b = complexity.reset_in_x_seconds) !== null && _b !== void 0 ? _b : 60);
                 }
-            }
-            else {
-                return [new error_1.InternalServerError('complexityException'), null];
+                if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
+                    (response === null || response === void 0 ? void 0 : response.error_code) ||
+                    ((_c = response === null || response === void 0 ? void 0 : response.errors) === null || _c === void 0 ? void 0 : _c.length) > 0) {
+                    console.log('error', response.status_code);
+                    return [new error_1.InternalServerError(response.error_code), null];
+                }
             }
             return [null, true];
         }
