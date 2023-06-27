@@ -417,7 +417,7 @@ class MondayService {
         return [null, res];
     }
     async getQueryRes(query, variables) {
-        var _a, _b;
+        var _a, _b, _c, _d;
         try {
             const response = await this.mondayClient.api(query, variables);
             if ((response === null || response === void 0 ? void 0 : response.data) && ((_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.complexity)) {
@@ -437,6 +437,10 @@ class MondayService {
                 fileName: 'monday service',
                 functionName: 'getQueryRes',
             });
+            if (((_c = error === null || error === void 0 ? void 0 : error.message) === null || _c === void 0 ? void 0 : _c.includes('Complexity')) || ((_d = error === null || error === void 0 ? void 0 : error.message) === null || _d === void 0 ? void 0 : _d.includes('ECONNRESET'))) {
+                console.log('TimeOut error!!!');
+                return [new error_1.TimeOutError(), null];
+            }
             return [error, null];
         }
     }
@@ -464,7 +468,10 @@ class MondayService {
                 if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
                     (response === null || response === void 0 ? void 0 : response.error_code) ||
                     ((_c = response === null || response === void 0 ? void 0 : response.errors) === null || _c === void 0 ? void 0 : _c.length) > 0) {
-                    console.log('error', response.status_code);
+                    if (response.errors[0].message === 'Variable $itemName of type String! was provided invalid value') {
+                        return [null, true];
+                    }
+                    console.log('error', response.error_code);
                     return [new error_1.InternalServerError(response.error_code), null];
                 }
             }
