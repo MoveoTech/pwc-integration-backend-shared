@@ -28,7 +28,7 @@ const _addTask = async (monAccessToken, userId, boardId, itemId, templateItemId,
         // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;
     }
-    const [taskTypeError, { taskType }] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
+    const [taskTypeError, { taskType, obligationId }] = await sharedService.getTaskType(monAccessToken, templateItemId, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_TYPE_COLUMN);
     if (taskTypeError) {
         // sharedService.pushNotification(monAccessToken, boardId, userId, ERRORS.GENERIC_ERROR);
         return;

@@ -25,7 +25,7 @@ class ActivateTasksService {
                         fileName: 'activate tasks service',
                         functionName: 'activateParentsItems',
                     });
-                    return 'false';
+                    return false;
                 }
                 return createdTask;
             }));

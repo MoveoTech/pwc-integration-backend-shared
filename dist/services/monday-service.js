@@ -107,6 +107,7 @@ class MondayService {
     }
     async queryItemsColumnsValuesByColumnValue(monAccessToken, boardId, obligationId, taskType) {
         var _a, _b;
+        // const cacheService = CacheService.getCacheService();
         const query = monday_queries_1.queries.queryItemsByColumnValue;
         let page = 1;
         let columnId = obligationId !== ''
@@ -123,6 +124,9 @@ class MondayService {
                 functionName: 'queryItemsColumnsValuesByBoardId',
                 data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
             });
+            // const pageCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
+            // const cachedPageRes = cacheService.getKey(pageCacheKey);
+            // if (!cachedPageRes) {
             const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
                 query,
                 variables: JSON.stringify(variables),
@@ -139,7 +143,17 @@ class MondayService {
             if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.items_by_column_values) === null || _b === void 0 ? void 0 : _b.length) {
                 itemsRes.push(...response.data.items_by_column_values);
                 itemsResCount = response.data.items_by_column_values.length;
+                // cacheService.setKey(
+                //   pageCacheKey,
+                //   JSON.stringify(response.data.items_by_column_values.items),
+                //   CACHE.ITEMS_BY_BOARD_ID_TTL
+                // );
             }
+            // } else {
+            //   const parsedPageRes = JSON.parse(cachedPageRes);
+            //   itemsRes.push(...parsedPageRes);
+            //   itemsResCount = parsedPageRes.length;
+            // }
             page++;
             variables.page = page;
         } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
@@ -150,13 +164,22 @@ class MondayService {
             data: `itemsRes length: ${JSON.stringify(itemsRes.length)}`,
         });
         if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
+            // const resCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}`;
+            // const cachedRes = cacheService.getKey(resCacheKey);
+            // if (!cachedRes) {
             const mappedRes = (0, monday_1.mapToItems)(itemsRes);
+            // cacheService.setKey(resCacheKey, JSON.stringify(mappedRes), CACHE.ITEMS_BY_BOARD_ID_TTL);
             return [null, mappedRes];
+            // } else {
+            //   const parsedRes = JSON.parse(cachedRes);
+            //   return [null, parsedRes];
+            // }
         }
         return [new error_1.InternalServerError(), null];
     }
     async querySubItems(monAccessToken, itemId) {
         var _a, _b, _c, _d, _e;
+        // TODO type for res
         const query = monday_queries_1.queries.querySubItems;
         const variables = { itemId };
         logger.info({
@@ -186,7 +209,7 @@ class MondayService {
         return [new error_1.InternalServerError(), null];
     }
     async changeItemStatus(monAccessToken, boardId, itemId, columnId, statusValue) {
-        var _a, _b;
+        var _a, _b, _c;
         const query = monday_queries_1.queries.changeItemColumnValue;
         const variables = {
             boardId,
@@ -201,37 +224,6 @@ class MondayService {
             functionName: 'changeItemStatus',
             data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
         });
-        const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
-        if (responseError) {
-            logger.error({
-                message: `responseError: ${JSON.stringify(responseError)}`,
-                fileName: 'monday service',
-                functionName: 'changeItemStatus',
-            });
-            return [responseError, null];
-        }
-        logger.info({
-            message: 'response',
-            fileName: 'monday service',
-            functionName: 'changeItemStatus',
-            data: `response: ${JSON.stringify(response === null || response === void 0 ? void 0 : response.data)}`,
-        });
-        if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.change_multiple_column_values) === null || _b === void 0 ? void 0 : _b.id) {
-            return [null, true];
-        }
-        return [new error_1.InternalServerError(), null];
-    }
-    async createItem(monAccessToken, boardId, itemName, columnValues) {
-        var _a, _b, _c;
-        const query = monday_queries_1.queries.createItem;
-        const variables = { itemName, boardId, columnValues: JSON.stringify(columnValues) };
-        logger.info({
-            message: 'start',
-            fileName: 'monday service',
-            functionName: 'createItem',
-            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
-        });
-        // // QUEUE FOR CREATION
         const code = (0, utils_1.codeGenerator)();
         const cacheService = cache_service_1.CacheService.getCacheService();
         const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
@@ -253,7 +245,7 @@ class MondayService {
         }
         const complexity = JSON.parse(cachedComplexity);
         if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < parseInt(complexity.before)) {
-            // console.log('enough complexity points, add to queue: ', parseInt(complexity.before));
+            // console.log('no complexity error, add to queue: ', parseInt(complexity.before));
             await ((_b = this.queue) === null || _b === void 0 ? void 0 : _b.add('message', {
                 messages: [
                     {
@@ -269,11 +261,11 @@ class MondayService {
             return [null, 'success'];
         }
         const scheduleDate = new Date();
-        console.log('complexity error, add to queue with delay');
-        console.log('reset_in_x_seconds: ', parseInt(complexity.reset_in_x_seconds));
-        console.log('scheduleDate: ', JSON.stringify(scheduleDate));
+        // console.log('complexity error, add to queue with delay');
+        // console.log('reset_in_x_seconds: ', parseInt(complexity.reset_in_x_seconds));
+        // console.log('scheduleDate: ', JSON.stringify(scheduleDate));
         scheduleDate.setSeconds(scheduleDate.getSeconds() + parseInt(complexity.reset_in_x_seconds));
-        console.log('scheduleDate with delay: ', JSON.stringify(scheduleDate));
+        // console.log('scheduleDate with delay: ', JSON.stringify(scheduleDate));
         await ((_c = this.queue) === null || _c === void 0 ? void 0 : _c.add('message', {
             messages: [
                 {
@@ -283,7 +275,90 @@ class MondayService {
             ],
         }, {
             jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${code}`,
-            delay: complexity.reset_in_x_seconds * 1000,
+            removeOnComplete: true,
+            removeOnFail: true,
+        }));
+        return [null, 'added with delay'];
+        // const [responseError, response] = await this.executeQuery(monAccessToken, query, variables);
+        // if (responseError) {
+        //   logger.error({
+        //     message: `responseError: ${JSON.stringify(responseError)}`,
+        //     fileName: 'monday service',
+        //     functionName: 'changeItemStatus',
+        //   });
+        //   return [responseError, null];
+        // }
+        // logger.info({
+        //   message: 'response',
+        //   fileName: 'monday service',
+        //   functionName: 'changeItemStatus',
+        //   data: `response: ${JSON.stringify(response?.data)}`,
+        // });
+        // if (response?.data?.change_multiple_column_values?.id) {
+        //   return [null, true];
+        // }
+        // return [new InternalServerError(), null];
+    }
+    async createItem(monAccessToken, boardId, itemName, columnValues) {
+        var _a, _b, _c;
+        const query = monday_queries_1.queries.createItem;
+        const variables = { itemName, boardId, columnValues: JSON.stringify(columnValues) };
+        logger.info({
+            message: 'start',
+            fileName: 'monday service',
+            functionName: 'createItem',
+            data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
+        });
+        // // QUEUE FOR CREATION
+        const code = (0, utils_1.codeGenerator)();
+        const cacheService = cache_service_1.CacheService.getCacheService();
+        const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
+        if (!cachedComplexity) {
+            await ((_a = this.queue) === null || _a === void 0 ? void 0 : _a.add('message', {
+                messages: [
+                    {
+                        query: query,
+                        variables: variables,
+                    },
+                ],
+            }, {
+                jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${code}`,
+                removeOnComplete: true,
+                removeOnFail: true,
+            }));
+            return [null, 'success'];
+        }
+        const complexity = JSON.parse(cachedComplexity);
+        if (monday_complexity_1.MONDAY_COMPLEXITY.MIN_COMPLEXITY_POINTS < parseInt(complexity.before)) {
+            await ((_b = this.queue) === null || _b === void 0 ? void 0 : _b.add('message', {
+                messages: [
+                    {
+                        query: query,
+                        variables: variables,
+                    },
+                ],
+            }, {
+                jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${code}`,
+                removeOnComplete: true,
+                removeOnFail: true,
+            }));
+            return [null, 'success'];
+        }
+        const scheduleDate = new Date();
+        // console.log('complexity error, add to queue with delay');
+        // console.log('reset_in_x_seconds: ', parseInt(complexity.reset_in_x_seconds));
+        // console.log('scheduleDate: ', JSON.stringify(scheduleDate));
+        scheduleDate.setSeconds(scheduleDate.getSeconds() + parseInt(complexity.reset_in_x_seconds));
+        // console.log('scheduleDate with delay: ', JSON.stringify(scheduleDate));
+        await ((_c = this.queue) === null || _c === void 0 ? void 0 : _c.add('message', {
+            messages: [
+                {
+                    query: query,
+                    variables: variables,
+                },
+            ],
+        }, {
+            jobId: `${variables === null || variables === void 0 ? void 0 : variables.boardId}-${Date.now()}-${code}`,
             removeOnComplete: true,
             removeOnFail: true,
         }));
@@ -404,17 +479,7 @@ class MondayService {
             functionName: 'executeQuery',
             data: `before: ${complexity.before}`,
         });
-        await new Promise((r) => setTimeout(r, complexity.reset_in_x_seconds * 1000 || 60000));
-        const [err, res] = await this.executeQuery(monAccessToken, query, variables);
-        if (err) {
-            logger.error({
-                message: `err: ${JSON.stringify(err)}`,
-                fileName: 'monday service',
-                functionName: 'executeQuery',
-            });
-            return [new error_1.TimeOutError(), null];
-        }
-        return [null, res];
+        return [new error_1.TimeOutError(), null];
     }
     async getQueryRes(query, variables) {
         var _a, _b, _c, _d;
@@ -445,7 +510,7 @@ class MondayService {
         }
     }
     async executeQueryFromQueue(monAccessToken, messages) {
-        var _a, _b, _c;
+        var _a, _b, _c, _d;
         try {
             logger.info({
                 message: 'start',
@@ -468,7 +533,8 @@ class MondayService {
                 if (((response === null || response === void 0 ? void 0 : response.status_code) && (response === null || response === void 0 ? void 0 : response.status_code) !== 200) ||
                     (response === null || response === void 0 ? void 0 : response.error_code) ||
                     ((_c = response === null || response === void 0 ? void 0 : response.errors) === null || _c === void 0 ? void 0 : _c.length) > 0) {
-                    if (response.errors[0].message === 'Variable $itemName of type String! was provided invalid value') {
+                    if (response.errors &&
+                        ((_d = response === null || response === void 0 ? void 0 : response.errors[0]) === null || _d === void 0 ? void 0 : _d.message) === 'Variable $itemName of type String! was provided invalid value') {
                         return [null, true];
                     }
                     console.log('error', response.error_code);
