@@ -7,6 +7,7 @@ const error_1 = require("../types/errors/error");
 const logger_service_1 = require("./logger-service");
 const monday_service_1 = require("./monday-service");
 const shared_service_1 = require("./shared-service");
+const errors_1 = require("../constants/errors");
 const logger = logger_service_1.LoggerService.getLogger();
 class ActivateTasksService {
     constructor() {
@@ -25,7 +26,7 @@ class ActivateTasksService {
                         fileName: 'activate tasks service',
                         functionName: 'activateParentsItems',
                     });
-                    return false;
+                    return 'false';
                 }
                 return createdTask;
             }));
@@ -36,12 +37,7 @@ class ActivateTasksService {
                     functionName: 'activateParentsItems',
                     data: `not all items created for ${parentItem.parentItemId} parent item id`,
                 });
-                // sharedService.pushNotification(
-                //   monAccessToken,
-                //   +boardIds.businessStreamBoardId,
-                //   userId,
-                //   ERRORS.INTEGRATION_CREATE_ITEMS_ERROR
-                // );
+                sharedService.pushNotification(monAccessToken, +boardIds.businessStreamBoardId, userId, errors_1.ERRORS.INTEGRATION_CREATE_ITEMS_ERROR);
                 return false;
             }
             const [itemStatusError, itemStatus] = await activateTasksService.changeStatusByItemType(monAccessToken, boardIds, parentItem.parentItemId, parentItem.type);
@@ -76,12 +72,7 @@ class ActivateTasksService {
             data: `activatedParents: ${JSON.stringify(activatedParents)}`,
         });
         if (isLastTasksGroup) {
-            // sharedService.pushNotification(
-            //   monAccessToken,
-            //   +boardIds.businessStreamBoardId,
-            //   userId,
-            //   'Business stream successfully activated'
-            // );
+            sharedService.pushNotification(monAccessToken, +boardIds.businessStreamBoardId, userId, 'Business stream successfully activated');
         }
     }
     async changeStatusByItemType(monAccessToken, boardIds, parentItemId, itemType) {

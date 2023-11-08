@@ -12,8 +12,7 @@ class SharedService {
     constructor() {
         this.mondayService = new monday_service_1.MondayService();
     }
-    async getTaskType(monAccessToken, itemId, columnId, templateTask) {
-        var _a, _b;
+    async getTaskType(monAccessToken, itemId, columnId) {
         const [itemColumnsValuesError, item] = await this.mondayService.queryItemColumnsValues(monAccessToken, itemId);
         if (itemColumnsValuesError) {
             logger.error({
@@ -21,7 +20,7 @@ class SharedService {
                 fileName: 'shared service',
                 functionName: 'getTaskType',
             });
-            return [itemColumnsValuesError, { taskType: null, obligationId: null }];
+            return [itemColumnsValuesError, null];
         }
         const [taskTypeError, taskType] = (0, monday_1.getColumnTextByColumnId)(item, columnId);
         if (taskTypeError) {
@@ -30,7 +29,7 @@ class SharedService {
                 fileName: 'shared service',
                 functionName: 'getTaskType',
             });
-            return [taskTypeError, { taskType: null, obligationId: null }];
+            return [taskTypeError, null];
         }
         logger.info({
             message: 'task type found',
@@ -38,28 +37,22 @@ class SharedService {
             functionName: 'getTaskType',
             data: `item: ${JSON.stringify(item)}, taskType: ${taskType}`,
         });
-        if (templateTask) {
-            return [null, taskType];
-        }
-        let obligationId = (_b = (_a = item === null || item === void 0 ? void 0 : item.columns) === null || _a === void 0 ? void 0 : _a.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN)) === null || _b === void 0 ? void 0 : _b.text;
-        return [null, { taskType, obligationId }];
+        return [null, taskType];
     }
-    async getSameTypeItems(monAccessToken, boardId, taskType, obligationId, shouldFetchAllItems) {
-        let items = [];
-        let itemsError;
-        if (!obligationId && shouldFetchAllItems) {
-            [itemsError, items] = await this.mondayService.getItemsColumnValuesByBoardId(monAccessToken, boardId);
-        }
-        else {
-            [itemsError, items] = await this.mondayService.queryItemsColumnsValuesByColumnValue(monAccessToken, boardId, obligationId, taskType);
-        }
+    async getSameTypeItems(monAccessToken, boardId, taskType) {
+        const [itemsError, items] = await this.mondayService.queryItemsColumnsValuesByBoardId(monAccessToken, boardId);
         if ((items === null || items === void 0 ? void 0 : items.length) === 0 || itemsError) {
             logger.error({
-                message: (items === null || items === void 0 ? void 0 : items.length) === 0 ? 'no items' : `itemsError: ${JSON.stringify(itemsError)}`,
+                message: (items === null || items === void 0 ? void 0 : items.length) === 0
+                    ? 'no items'
+                    : `itemsError: ${JSON.stringify(itemsError)}`,
                 fileName: 'shared service',
                 functionName: 'getSameTypeItems',
             });
-            return [(items === null || items === void 0 ? void 0 : items.length) === 0 ? new error_1.BadRequestError() : itemsError !== null && itemsError !== void 0 ? itemsError : new error_1.InternalServerError(), null];
+            return [
+                (items === null || items === void 0 ? void 0 : items.length) === 0 ? new error_1.BadRequestError() : itemsError !== null && itemsError !== void 0 ? itemsError : new error_1.InternalServerError(),
+                null,
+            ];
         }
         const [sameTypeItemsError, sameTypeItems] = (0, monday_1.filterItemsByColumnValue)(items, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN, taskType);
         if ((sameTypeItems === null || sameTypeItems === void 0 ? void 0 : sameTypeItems.length) === 0 || sameTypeItemsError) {
@@ -125,7 +118,7 @@ class SharedService {
             if (!returnItems.length) {
                 logger.error({
                     message: 'no custom returnItems',
-                    fileName: 'shared service',
+                    fileName: 'shared servicee',
                     functionName: 'getNextReturnItem',
                 });
                 return [new error_1.InternalServerError(), null];

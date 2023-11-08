@@ -18,7 +18,7 @@ class IntegrationService {
         this.mondayService = new monday_service_1.MondayService();
         this.sharedService = new shared_service_1.SharedService();
     }
-    async shouldSyncNextStatus(monAccessToken, boardId, item, sameTypeItems, taskType) {
+    async syncNextStatus(monAccessToken, boardId, item, sameTypeItems, taskType) {
         var _a, _b, _c;
         const [relatedItemsError, relatedItems] = (0, integration_1.getRelatedItemsByTaskType)(item, sameTypeItems, taskType);
         if (relatedItemsError) {
@@ -104,14 +104,21 @@ class IntegrationService {
         else {
             nextActiveItem = filteredTasksBySameDate[0];
         }
-        return [
-            null,
-            {
-                nextActiveItemId: parseInt(nextActiveItem.id),
-            },
-        ];
+        const [itemStatusError, itemStatus] = await this.mondayService.changeItemStatus(monAccessToken, boardId, parseInt(nextActiveItem.id), sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN, sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS);
+        if (itemStatusError) {
+            logger.error({
+                message: `itemStatusError: ${JSON.stringify(itemStatusError)}`,
+                fileName: 'integration service',
+                functionName: 'syncNextStatus',
+            });
+            return [itemStatusError, null];
+        }
+        if (itemStatus) {
+            return [null, nextActiveItem.id];
+        }
+        return [new error_1.InternalServerError(), null];
     }
-    async shouldCreateNextItem(monAccessToken, item, taskType, boardId, userId) {
+    async createNextItem(monAccessToken, item, taskType, boardId, userId) {
         const [produceTasksError, produceTasks] = await this.checkProduceTasks(monAccessToken, item, taskType);
         if (produceTasksError) {
             logger.error({
@@ -134,13 +141,16 @@ class IntegrationService {
             });
             return [nextTaskError, null];
         }
-        return [
-            null,
-            {
-                nextTaskName: nextTask.name,
-                nextTaskColumnValues: nextTask.columnValues,
-            },
-        ];
+        const [createdTaskError, createdTask] = await this.mondayService.createItem(monAccessToken, boardId, nextTask.name, nextTask.columnValues);
+        if (createdTaskError) {
+            logger.error({
+                message: `createdTaskError: ${JSON.stringify(createdTaskError)}`,
+                fileName: 'integration service',
+                functionName: 'createNextItem',
+            });
+            return [createdTaskError, null];
+        }
+        return [null, createdTask];
     }
     async checkProduceTasks(monAccessToken, item, taskType) {
         let taskDefinitionParentColumnId;
@@ -212,7 +222,7 @@ class IntegrationService {
                 fileName: 'integration service',
                 functionName: 'buildNextTask',
             });
-            return [currentTaskError, null];
+            return [new error_1.InternalServerError(), null];
         }
         if (!(currentReturnItem === null || currentReturnItem === void 0 ? void 0 : currentReturnItem.parentItemId)) {
             logger.error({
@@ -220,7 +230,7 @@ class IntegrationService {
                 fileName: 'integration service',
                 functionName: 'buildNextTask',
             });
-            return [currentReturnItemError, null];
+            return [new error_1.InternalServerError(), null];
         }
         let [returnItemParentError, returnItemParent] = await this.mondayService.queryItemColumnsValues(monAccessToken, parseInt(currentReturnItem === null || currentReturnItem === void 0 ? void 0 : currentReturnItem.parentItemId));
         if (returnItemParentError || !returnItemParent) {
@@ -240,7 +250,7 @@ class IntegrationService {
             });
             return [isItemCustomTemplateError, null];
         }
-        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, 1);
+        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, skipping_numbers_1.SKIPPING_NUMBER);
         if (nextReturnItemError) {
             logger.error({
                 message: `nextReturnItemError: ${JSON.stringify(nextReturnItemError)}`,
@@ -279,31 +289,23 @@ class IntegrationService {
             return [submissionsDatesError, null];
         }
         const [ownerNameError, ownerName] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN);
-        let ownerIds = '';
-        if (ownerName) {
-            const owners = ownerName === null || ownerName === void 0 ? void 0 : ownerName.split(', ');
-            if (ownerNameError) {
-                logger.error({
-                    message: `ownerNameError: ${JSON.stringify(ownerNameError)}`,
-                    fileName: 'integration service',
-                    functionName: 'buildNextTask',
-                });
-                return [ownerNameError, null];
-            }
-            const [ownerIdError, ownerIdsArr] = owners
-                ? await this.mondayService.getUserIdByName(monAccessToken, owners)
-                : [null, owners];
-            if (ownerIdError) {
-                logger.error({
-                    message: `ownerIdError: ${JSON.stringify(ownerIdError)}`,
-                    fileName: 'integration service',
-                    functionName: 'buildNextTask',
-                });
-                return [ownerIdError, null];
-            }
-            ownerIds = ownerIdsArr;
+        if (ownerNameError) {
+            logger.error({
+                message: `ownerNameError: ${JSON.stringify(ownerNameError)}`,
+                fileName: 'integration service',
+                functionName: 'buildNextTask',
+            });
+            return [ownerNameError, null];
         }
-        let ownersIdsObject = { personsAndTeams: ownerIds };
+        const [ownerIdError, ownerId] = ownerName !== '' ? await this.mondayService.getUserIdByName(monAccessToken, ownerName) : [null, ownerName];
+        if (ownerIdError) {
+            logger.error({
+                message: `ownerIdError: ${JSON.stringify(ownerIdError)}`,
+                fileName: 'integration service',
+                functionName: 'buildNextTask',
+            });
+            return [ownerIdError, null];
+        }
         const [regionError, region] = (0, monday_1.getColumnTextByColumnId)(item, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN);
         if (regionError) {
             logger.error({
@@ -313,7 +315,7 @@ class IntegrationService {
             });
             return [regionError, null];
         }
-        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerName ? ownersIdsObject : '', region);
+        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerId.toString(), region);
         if (itemColumnsError) {
             logger.error({
                 message: `itemColumnsError: ${JSON.stringify(itemColumnsError)}`,

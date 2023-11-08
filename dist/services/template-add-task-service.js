@@ -49,7 +49,7 @@ class TemplateAddTaskService {
             default:
                 return [new error_1.BadRequestError(), null];
         }
-        const [itemsError, items] = await this.mondayService.getItemsColumnValuesByBoardId(monAccessToken, definitionBoardId);
+        const [itemsError, items] = await this.mondayService.queryItemsColumnsValuesByBoardId(monAccessToken, definitionBoardId);
         if (itemsError) {
             logger.error({
                 message: `itemsError: ${JSON.stringify(itemsError)}`,

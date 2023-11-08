@@ -54,7 +54,7 @@ const getColumnValue = (item, columnId) => {
     return columnValue;
 };
 exports.getColumnValue = getColumnValue;
-const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, taskId, returnId, isItemCustomTemplate, isNewTask = false, ownerIds = { personsAndTeams: [] }, region = '') => {
+const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, taskId, returnId, isItemCustomTemplate, isNewTask = false, ownerId = '', region = '') => {
     const taskRoleValue = (0, exports.getColumnValue)(currentTask, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_ROLE_COLUMN);
     const taskOrderValue = (0, exports.getColumnValue)(currentTask, isItemCustomTemplate
         ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_ORDER_COLUMN
@@ -97,8 +97,8 @@ const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, 
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN]: taskType === sync_integration_values_1.SYNC_INTEGRATION_VALUES.FILING_TASK_TYPE ? parentItem.id : '',
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ID_COLUMN]: taskId.toString(),
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN]: returnId.toString(),
-            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN]: ownerIds,
-            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN]: !region ? '' : region,
+            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN]: ownerId,
+            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN]: region,
         },
     ];
 };
