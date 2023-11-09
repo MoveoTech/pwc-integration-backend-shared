@@ -9,5 +9,6 @@ exports.default = {
     COLUMN_MAX_SIZE: 'Value exceeded max value for column',
     UNAUTHORIZED_USER: 'User unauthorized to perform action',
     MUTATION_EXCEEDED: 'Call limit exceeded for Mutations::ChangePulseColumnValues',
+    COLUMN_VALUE_EXCEPTION: 'ColumnValueException',
 };
 //# sourceMappingURL=job-failures.js.map

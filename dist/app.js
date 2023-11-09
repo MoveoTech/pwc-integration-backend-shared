@@ -26,6 +26,11 @@ app.use(body_parser_1.default.urlencoded({ limit: '20mb', extended: true }));
 app.use(express_1.default.urlencoded({
     extended: true,
 }));
+app.use(function (req, res, next) {
+    res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('Pragma', 'no-cache');
+    next();
+});
 app.use(routes_1.default);
 const main = async () => {
     try {
