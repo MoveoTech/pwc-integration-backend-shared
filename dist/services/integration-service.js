@@ -240,7 +240,7 @@ class IntegrationService {
             });
             return [isItemCustomTemplateError, null];
         }
-        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, SKIPPING_NUMBER);
+        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, 1);
         if (nextReturnItemError) {
             logger.error({
                 message: `nextReturnItemError: ${JSON.stringify(nextReturnItemError)}`,
