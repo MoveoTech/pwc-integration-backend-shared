@@ -7,5 +7,6 @@ exports.ERRORS = {
     INTEGRATION_CREATE_NEXT_ITEM_ERROR: "For some reason, the next item hasn't been created",
     INTEGRATION_CREATE_ITEMS_ERROR: 'A problem occurred while activating the business stream. Check “ITX Outsource Compliance Operations Guidelines” for more information.',
     STOP_PRODUCE: "New item hasn't been created since produce status is stop",
+    FUTURE_TASKS: "There are no more future tasks left",
 };
 //# sourceMappingURL=errors.js.map

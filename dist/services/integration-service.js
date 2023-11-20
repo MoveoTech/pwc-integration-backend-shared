@@ -81,6 +81,9 @@ class IntegrationService {
         }
         const currentTaskDateObj = new Date(currentTaskDate);
         const filterFutureTasks = itemsDates.filter((itemDate) => itemDate.taskDueDate >= currentTaskDateObj && itemDate.id !== item.id);
+        if (!filterFutureTasks.length) {
+            return [null, errors_1.ERRORS.FUTURE_TASKS];
+        }
         const filterRelevantTasks = filterFutureTasks.filter((itemData) => itemData.taskDueDate > currentTaskDateObj ||
             (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
                 itemData.taskOrder > currentTaskOrder &&
