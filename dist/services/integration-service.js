@@ -81,6 +81,9 @@ class IntegrationService {
         }
         const currentTaskDateObj = new Date(currentTaskDate);
         const filterFutureTasks = itemsDates.filter((itemDate) => itemDate.taskDueDate >= currentTaskDateObj && itemDate.id !== item.id);
+        if (!filterFutureTasks.length) {
+            return [null, errors_1.ERRORS.FUTURE_TASKS];
+        }
         const filterRelevantTasks = filterFutureTasks.filter((itemData) => itemData.taskDueDate > currentTaskDateObj ||
             (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
                 itemData.taskOrder > currentTaskOrder &&
@@ -240,7 +243,7 @@ class IntegrationService {
             });
             return [isItemCustomTemplateError, null];
         }
-        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, 1);
+        const [nextReturnItemError, nextReturnItem] = await this.sharedService.getNextReturnItem(monAccessToken, currentReturnItem, returnItemParent, isItemCustomTemplate, taskType, skipping_numbers_1.SKIPPING_NUMBER);
         if (nextReturnItemError) {
             logger.error({
                 message: `nextReturnItemError: ${JSON.stringify(nextReturnItemError)}`,

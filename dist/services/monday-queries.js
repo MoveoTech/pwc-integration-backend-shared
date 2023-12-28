@@ -2,92 +2,193 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queries = void 0;
 exports.queries = {
-    queryItemColumnsValues: `query($itemId: [Int]) {
-      items(ids: $itemId) {
+    //TODO: update
+    queryItemColumnsValues: `query ($itemId: [ID!]) {
+    items(ids: $itemId) {
+      id
+      name
+      parent_item {
         id
-        name
-        parent_item{
-          id
-        }
-        column_values {
-          id
-          text
-        }
       }
-      complexity { before reset_in_x_seconds after }
+      column_values {
+        id
+        text
+      }
     }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
   `,
-    getItemsColumnValuesByBoardId: `query ($boardId: [Int]!, $page: Int!, $limit: Int!){
-    boards (ids: $boardId) {
-      items (page: $page, limit: $limit) {
-        id
-        name
-        column_values {
-          id
-          text
-        }
-      }
-    }
-    complexity { before reset_in_x_seconds after }
-  }`,
-    queryItemsByColumnValue: `query($boardId: Int!, $columnId: String!, $columnValue: String!, $page: Int!, $limit: Int!) {
-      items_by_column_values(board_id: $boardId, column_id: $columnId, column_value: $columnValue, page: $page, limit: $limit) {
-        id
-        name
-        parent_item{
-            id
-        }
-        column_values {
-            id
-            text
-        }
-      }
-      complexity { before reset_in_x_seconds after }
-    }
-  `,
-    querySubItems: `query($itemId: [Int]) {
-      items(ids: $itemId) {
-        subitems{
+    //updated with cursor query
+    getItemsColumnValuesByBoardId: `query ($boardId: [ID!], $limit: Int!) {
+    boards(ids: $boardId) {
+      items_page(limit: $limit) {
+        cursor
+        items {
           id
           name
-          parent_item{
-              id
-          }
           column_values {
-              id
-              text
+            id
+            text
           }
         }
       }
-      complexity { before reset_in_x_seconds after }
     }
-  `,
-    changeItemColumnValue: `mutation($boardId: Int!, $itemId: Int!, $columnValues: JSON!) {
-      change_multiple_column_values (board_id: $boardId, item_id: $itemId, column_values: $columnValues) {
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }`,
+    getItemsColumnValuesByBoardIdCursor: `query ($boardId: [ID!], $limit: Int!, $cursor: String!) {
+    boards(ids: $boardId) {
+      items_page(limit: $limit, cursor: $cursor) {
+        cursor
+        items {
           id
+          name
+          column_values {
+            id
+            text
+          }
+        }
       }
-      complexity { before reset_in_x_seconds after }
     }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }`,
+    //updated with cursor query
+    queryItemsByColumnValue: `query ($boardId: ID!, $columnId: String!, $columnValue: [String]!, $limit: Int) {
+    items_page_by_column_values(
+      board_id: $boardId
+      columns: [{column_id: $columnId, column_values: $columnValue}]
+      limit: $limit
+    ) {
+      cursor
+      items {
+        id
+        name
+        parent_item {
+          id
+        }
+        column_values {
+          id
+          text
+        }
+      }
+    }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
   `,
-    createItem: `mutation($boardId: Int!, $itemName: String!, $columnValues: JSON) {
+    queryItemsByColumnValueCursor: `query ($boardId: ID!, $limit: Int, $cursor: String!) {
+    items_page_by_column_values(board_id: $boardId, limit: $limit, cursor: $cursor) {
+      cursor
+      items {
+        id
+        name
+        parent_item {
+          id
+        }
+        column_values {
+          id
+          text
+        }
+      }
+    }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
+  `,
+    //updated
+    querySubItems: `query ($itemId: [ID!]) {
+    items(ids: $itemId) {
+      subitems {
+        id
+        name
+        parent_item {
+          id
+        }
+        column_values {
+          id
+          text
+        }
+      }
+    }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
+  `,
+    //updated
+    changeItemColumnValue: `mutation ($boardId: ID!, $itemId: ID!, $columnValues: JSON!) {
+    change_multiple_column_values(
+      board_id: $boardId
+      item_id: $itemId
+      column_values: $columnValues
+    ) {
+      id
+    }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
+  `,
+    //updated
+    createItem: `mutation($boardId: ID!, $itemName: String!, $columnValues: JSON) {
       create_item (board_id: $boardId, item_name: $itemName, column_values: $columnValues) {
           id
       }
-      complexity { before reset_in_x_seconds after }
-    }
-  `,
-    createNotification: `mutation($text: String!, $userId: Int!, $targetId: Int!) {
-      create_notification (user_id: $userId, target_id: $targetId, text: $text, target_type: Project) {
-          text
+      complexity {
+        before
+        reset_in_x_seconds
+        after
       }
-      complexity { before reset_in_x_seconds after }
     }
   `,
+    //updated
+    createNotification: `mutation ($text: String!, $userId: ID!, $targetId: ID!) {
+    create_notification(
+      user_id: $userId
+      target_id: $targetId
+      text: $text
+      target_type: Project
+    ) {
+      text
+    }
+    complexity {
+      before
+      reset_in_x_seconds
+      after
+    }
+  }
+  `,
+    //updated
     getUserId: `query ($name: String){
       users (name: $name) {
         id
       }
-      complexity { before reset_in_x_seconds after }
+      complexity {
+        before
+        reset_in_x_seconds
+        after
+      }
     }
   `,
 };

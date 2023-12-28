@@ -12,6 +12,7 @@ async function postRequest(url, token, body) {
         const options = {
             headers: {
                 'Content-Type': 'application/json',
+                'API-Version': '2024-01',
                 Authorization: `${token}`,
             },
         };
@@ -21,7 +22,7 @@ async function postRequest(url, token, body) {
     catch (error) {
         logger.error({
             message: `catch error: ${JSON.stringify(error)}`,
-            fileName: 'htpp service',
+            fileName: 'http service',
             functionName: 'postRequest',
         });
         return [error, null];

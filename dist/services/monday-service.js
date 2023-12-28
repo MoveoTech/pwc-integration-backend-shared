@@ -23,6 +23,7 @@ const mondayApiUrl = 'https://api.monday.com/v2';
 class MondayService {
     constructor() {
         this.mondayClient = (0, monday_sdk_js_1.default)();
+        this.mondayClient.setApiVersion('2024-01');
         this.queue = queue_1.default.getQueue();
     }
     async queryItemColumnsValues(monAccessToken, itemId) {
@@ -56,12 +57,11 @@ class MondayService {
         return [new error_1.InternalServerError(), null];
     }
     async getItemsColumnValuesByBoardId(monAccessToken, boardId) {
-        var _a, _b, _c, _d;
-        const query = monday_queries_1.queries.getItemsColumnValuesByBoardId;
-        let page = 1;
-        const variables = { boardId, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
+        var _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m;
+        let query = monday_queries_1.queries.getItemsColumnValuesByBoardId;
+        let variables = { boardId, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
         const itemsRes = [];
-        let itemsResCount = 0;
+        let itemsCount;
         do {
             logger.info({
                 message: 'start do',
@@ -81,18 +81,18 @@ class MondayService {
                 });
                 return [responseError, null];
             }
-            itemsResCount = 0;
-            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.boards) === null || _b === void 0 ? void 0 : _b.length) {
-                itemsRes.push(...response.data.boards[0].items);
-                itemsResCount = response.data.boards[0].items.length;
+            if ((_d = (_c = (_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.boards[0]) === null || _b === void 0 ? void 0 : _b.items_page) === null || _c === void 0 ? void 0 : _c.items) === null || _d === void 0 ? void 0 : _d.length) {
+                itemsRes.push(...(_f = (_e = response === null || response === void 0 ? void 0 : response.data.boards[0]) === null || _e === void 0 ? void 0 : _e.items_page) === null || _f === void 0 ? void 0 : _f.items);
+                if ((_h = (_g = response === null || response === void 0 ? void 0 : response.data.boards[0]) === null || _g === void 0 ? void 0 : _g.items_page) === null || _h === void 0 ? void 0 : _h.cursor) {
+                    itemsCount = (_k = (_j = response === null || response === void 0 ? void 0 : response.data.boards[0]) === null || _j === void 0 ? void 0 : _j.items_page) === null || _k === void 0 ? void 0 : _k.cursor;
+                    variables.cursor = (_m = (_l = response === null || response === void 0 ? void 0 : response.data.boards[0]) === null || _l === void 0 ? void 0 : _l.items_page) === null || _m === void 0 ? void 0 : _m.cursor;
+                    query = monday_queries_1.queries.getItemsColumnValuesByBoardIdCursor;
+                }
+                else {
+                    itemsCount = null;
+                }
             }
-            if ((_d = (_c = response === null || response === void 0 ? void 0 : response.data) === null || _c === void 0 ? void 0 : _c.items_by_column_values) === null || _d === void 0 ? void 0 : _d.length) {
-                itemsRes.push(...response.data.items_by_column_values);
-                itemsResCount = response.data.items_by_column_values.length;
-            }
-            page++;
-            variables.page = page;
-        } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
+        } while (itemsCount);
         logger.info({
             message: 'response success',
             fileName: 'monday service',
@@ -106,17 +106,16 @@ class MondayService {
         return [new error_1.InternalServerError(), null];
     }
     async queryItemsColumnsValuesByColumnValue(monAccessToken, boardId, obligationId, taskType) {
-        var _a, _b;
+        var _a, _b, _c, _d, _e, _f;
         // const cacheService = CacheService.getCacheService();
-        const query = monday_queries_1.queries.queryItemsByColumnValue;
-        let page = 1;
+        let query = monday_queries_1.queries.queryItemsByColumnValue;
         let columnId = obligationId !== ''
             ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN
             : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN;
         let columnValue = obligationId !== '' ? obligationId : taskType;
-        const variables = { boardId, columnId, columnValue, page, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
+        const variables = { boardId, columnId, columnValue, limit: sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY };
         const itemsRes = [];
-        let itemsResCount = 0;
+        let itemsCount;
         do {
             logger.info({
                 message: 'start do',
@@ -124,9 +123,6 @@ class MondayService {
                 functionName: 'queryItemsColumnsValuesByBoardId',
                 data: `query: ${JSON.stringify(query)}, vars: ${JSON.stringify(variables)}`,
             });
-            // const pageCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}_${page}`;
-            // const cachedPageRes = cacheService.getKey(pageCacheKey);
-            // if (!cachedPageRes) {
             const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
                 query,
                 variables: JSON.stringify(variables),
@@ -139,24 +135,18 @@ class MondayService {
                 });
                 return [responseError, null];
             }
-            itemsResCount = 0;
-            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.items_by_column_values) === null || _b === void 0 ? void 0 : _b.length) {
-                itemsRes.push(...response.data.items_by_column_values);
-                itemsResCount = response.data.items_by_column_values.length;
-                // cacheService.setKey(
-                //   pageCacheKey,
-                //   JSON.stringify(response.data.items_by_column_values.items),
-                //   CACHE.ITEMS_BY_BOARD_ID_TTL
-                // );
+            if ((_b = (_a = response === null || response === void 0 ? void 0 : response.data) === null || _a === void 0 ? void 0 : _a.items_page_by_column_values) === null || _b === void 0 ? void 0 : _b.items.length) {
+                itemsRes.push(...(_d = (_c = response === null || response === void 0 ? void 0 : response.data) === null || _c === void 0 ? void 0 : _c.items_page_by_column_values) === null || _d === void 0 ? void 0 : _d.items);
+                if ((_f = (_e = response === null || response === void 0 ? void 0 : response.data) === null || _e === void 0 ? void 0 : _e.items_page_by_column_values) === null || _f === void 0 ? void 0 : _f.cursor) {
+                    itemsCount = response.data.items_page_by_column_values.cursor;
+                    variables.cursor = response.data.items_page_by_column_values.cursor;
+                    query = monday_queries_1.queries.queryItemsByColumnValueCursor;
+                }
+                else {
+                    itemsCount = null;
+                }
             }
-            // } else {
-            //   const parsedPageRes = JSON.parse(cachedPageRes);
-            //   itemsRes.push(...parsedPageRes);
-            //   itemsResCount = parsedPageRes.length;
-            // }
-            page++;
-            variables.page = page;
-        } while (itemsResCount === sync_integration_values_1.SYNC_INTEGRATION_VALUES.MAX_ITEMS_PER_QUERY);
+        } while (itemsCount);
         logger.info({
             message: 'response success',
             fileName: 'monday service',
@@ -164,16 +154,8 @@ class MondayService {
             data: `itemsRes length: ${JSON.stringify(itemsRes.length)}`,
         });
         if (itemsRes === null || itemsRes === void 0 ? void 0 : itemsRes.length) {
-            // const resCacheKey = `${CACHE.ITEMS_BY_BOARD_ID}_${boardId}`;
-            // const cachedRes = cacheService.getKey(resCacheKey);
-            // if (!cachedRes) {
             const mappedRes = (0, monday_1.mapToItems)(itemsRes);
-            // cacheService.setKey(resCacheKey, JSON.stringify(mappedRes), CACHE.ITEMS_BY_BOARD_ID_TTL);
             return [null, mappedRes];
-            // } else {
-            //   const parsedRes = JSON.parse(cachedRes);
-            //   return [null, parsedRes];
-            // }
         }
         return [new error_1.InternalServerError(), null];
     }
@@ -518,6 +500,7 @@ class MondayService {
                 functionName: 'executeQueryFromQueue',
                 data: `messages: ${JSON.stringify(messages)}`,
             });
+            this.mondayClient.setApiVersion('2024-01');
             const cacheService = cache_service_1.CacheService.getCacheService();
             const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
             const complexity = JSON.parse(cachedComplexity);

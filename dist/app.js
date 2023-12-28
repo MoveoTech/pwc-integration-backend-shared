@@ -43,6 +43,14 @@ const main = async () => {
                 servername: process.env.REDIS_HOST,
             },
         };
+        // const queueConnection = {
+        //   port: Number(6379),
+        //   host: 'localhost',
+        //   // password: process.env.REDIS_PASS,
+        //   // tls: {
+        //   //   servername: process.env.REDIS_HOST,
+        //   // },
+        // };
         queue_1.default.setQueueConnection(queueConnection);
         const queue = (0, queue_service_1.createQueue)();
         queue_1.default.setQueue(queue);

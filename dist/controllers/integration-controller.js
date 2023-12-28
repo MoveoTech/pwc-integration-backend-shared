@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncStatusAndTasks = void 0;
+const errors_1 = require("./../constants/errors");
 const integration_service_1 = require("../services/integration-service");
 const logger_service_1 = require("../services/logger-service");
 const sync_integration_columns_1 = require("../constants/sync-integration-columns");
@@ -82,17 +83,8 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
             // sharedService.pushNotification(monAccessToken, boardId, userId, message);
             return new Error(shouldSyncNextStatusError ? shouldSyncNextStatusError.message : shouldCreateNextItemError === null || shouldCreateNextItemError === void 0 ? void 0 : shouldCreateNextItemError.message);
         }
-        if (createNextItemParams && syncNextStatusParams) {
+        if (createNextItemParams === errors_1.ERRORS.STOP_PRODUCE && syncNextStatusParams === errors_1.ERRORS.FUTURE_TASKS) {
             try {
-                let { nextActiveItemId } = syncNextStatusParams;
-                let { nextTaskName, nextTaskColumnValues } = createNextItemParams;
-                const changeStatusToActiveVariables = {
-                    boardId,
-                    itemId: nextActiveItemId,
-                    columnValues: JSON.stringify({
-                        [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN]: sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS,
-                    }),
-                };
                 const changeStatusToReadyToTransferVariables = {
                     boardId,
                     itemId,
@@ -100,24 +92,11 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
                         [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN]: sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_READY_FOR_TRANSFER,
                     }),
                 };
-                const createItemVariables = {
-                    boardId,
-                    itemName: nextTaskName,
-                    columnValues: JSON.stringify(nextTaskColumnValues),
-                };
                 const messages = [
                     {
                         query: monday_queries_1.queries.changeItemColumnValue,
-                        variables: changeStatusToActiveVariables,
-                    },
-                    {
-                        query: monday_queries_1.queries.changeItemColumnValue,
                         variables: changeStatusToReadyToTransferVariables,
-                    },
-                    {
-                        query: monday_queries_1.queries.createItem,
-                        variables: createItemVariables,
-                    },
+                    }
                 ];
                 var code = (0, utils_1.codeGenerator)();
                 await (queue === null || queue === void 0 ? void 0 : queue.add('messages', {
@@ -135,6 +114,66 @@ const _syncStatusAndTasks = async (monAccessToken, itemId, boardId, userId) => {
                     functionName: 'syncStatusAndTasks',
                     data: `messages failed to inject to queue: ${JSON.stringify(error.message)}`,
                 });
+            }
+        }
+        else if (createNextItemParams && syncNextStatusParams === errors_1.ERRORS.FUTURE_TASKS) {
+            return;
+        }
+        else {
+            if (createNextItemParams && syncNextStatusParams) {
+                try {
+                    let { nextActiveItemId } = syncNextStatusParams;
+                    let { nextTaskName, nextTaskColumnValues } = createNextItemParams;
+                    const changeStatusToActiveVariables = {
+                        boardId,
+                        itemId: nextActiveItemId,
+                        columnValues: JSON.stringify({
+                            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN]: sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_ACTIVE_STATUS,
+                        }),
+                    };
+                    const changeStatusToReadyToTransferVariables = {
+                        boardId,
+                        itemId,
+                        columnValues: JSON.stringify({
+                            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_STATUS_COLUMN]: sync_integration_values_1.SYNC_INTEGRATION_VALUES.TASK_READY_FOR_TRANSFER,
+                        }),
+                    };
+                    const createItemVariables = {
+                        boardId,
+                        itemName: nextTaskName,
+                        columnValues: JSON.stringify(nextTaskColumnValues),
+                    };
+                    const messages = [
+                        {
+                            query: monday_queries_1.queries.changeItemColumnValue,
+                            variables: changeStatusToActiveVariables,
+                        },
+                        {
+                            query: monday_queries_1.queries.changeItemColumnValue,
+                            variables: changeStatusToReadyToTransferVariables,
+                        },
+                        {
+                            query: monday_queries_1.queries.createItem,
+                            variables: createItemVariables,
+                        },
+                    ];
+                    var code = (0, utils_1.codeGenerator)();
+                    await (queue === null || queue === void 0 ? void 0 : queue.add('messages', {
+                        messages,
+                    }, {
+                        jobId: `${boardId}-${Date.now()}-${code}`,
+                        removeOnComplete: true,
+                        removeOnFail: true,
+                    }));
+                }
+                catch (error) {
+                    logger.error({
+                        message: 'inject to queue error',
+                        fileName: 'integration controller',
+                        functionName: 'syncStatusAndTasks',
+                        data: `messages failed to inject to queue: ${JSON.stringify(error.message)}`,
+                    });
+                }
             }
         }
         // const [changeItemStatusErr, changeItemStatusRes] = await mondayService.changeItemStatus(
