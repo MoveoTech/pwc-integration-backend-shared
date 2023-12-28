@@ -27,7 +27,7 @@
     "helmet": "^6.0.1",
     "husky": "^8.0.3",
     "jsonwebtoken": "^9.0.0",
-    "monday-sdk-js": "^0.2.1",
+    "monday-sdk-js": "^0.4.9",
     "node-cache": "^5.1.2",
     "prettier": "^2.8.4",
     "winston": "^3.8.2"
