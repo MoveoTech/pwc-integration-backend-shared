@@ -316,7 +316,8 @@ class IntegrationService {
             });
             return [regionError, null];
         }
-        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerName ? ownersIdsObject : '', region);
+        const periodEnd = nextReturnItem.nextReturnItem.columns.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_PERIOD_END_COLUMN);
+        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, currentTask, taskType, taskCreationParams.taskId, parseInt(nextReturnItem.nextReturnItem.id), isItemCustomTemplate, false, ownerName ? ownersIdsObject : '', region, periodEnd ? periodEnd === null || periodEnd === void 0 ? void 0 : periodEnd.text : '');
         if (itemColumnsError) {
             logger.error({
                 message: `itemColumnsError: ${JSON.stringify(itemColumnsError)}`,
