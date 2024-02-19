@@ -33,6 +33,9 @@ const mapColumnsValues = (columnsValues) => {
 };
 const getColumnTextByColumnId = (item, columnId) => {
     var _a;
+    if (!columnId) {
+        return [null, null];
+    }
     if (!((_a = item === null || item === void 0 ? void 0 : item.columns) === null || _a === void 0 ? void 0 : _a.length)) {
         return [new error_1.InternalServerError(), null];
     }
@@ -54,7 +57,7 @@ const getColumnValue = (item, columnId) => {
     return columnValue;
 };
 exports.getColumnValue = getColumnValue;
-const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, taskId, returnId, isItemCustomTemplate, isNewTask = false, ownerIds = { personsAndTeams: [] }, region = '') => {
+const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, taskId, returnId, isItemCustomTemplate, isNewTask = false, ownerIds = { personsAndTeams: [] }, region = '', periodEnd) => {
     const taskRoleValue = (0, exports.getColumnValue)(currentTask, sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TEMPLATE_ROLE_COLUMN);
     const taskOrderValue = (0, exports.getColumnValue)(currentTask, isItemCustomTemplate
         ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_TASK_ORDER_COLUMN
@@ -99,6 +102,7 @@ const createItemColumns = (submissionsDates, parentItem, currentTask, taskType, 
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN]: returnId.toString(),
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN]: ownerIds,
             [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN]: !region ? '' : region,
+            [sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_PERIOD_END_COLUMN]: !periodEnd ? '' : periodEnd,
         },
     ];
 };

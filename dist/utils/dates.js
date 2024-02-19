@@ -130,10 +130,14 @@ const getDateTemplateColumnsValues = (taskType, returnItem, dateTemplate, isItem
 const getReturnItemColumnValues = (taskType, returnItem, isItemCustomTemplate) => {
     let dayColumn;
     let monthColumn;
+    let periodEndColumn;
     switch (taskType) {
         case sync_integration_values_1.SYNC_INTEGRATION_VALUES.DATA_TASK_TYPE:
             dayColumn = sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_DATE_TEMPLATE_DAY_COLUMN;
             monthColumn = sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_DATE_TEMPLATE_MONTH_COLUMN;
+            if (!isItemCustomTemplate && periodEndColumn) {
+                periodEndColumn = sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_PERIOD_END_COLUMN;
+            }
             break;
         case sync_integration_values_1.SYNC_INTEGRATION_VALUES.FILING_TASK_TYPE:
             dayColumn = isItemCustomTemplate
@@ -142,6 +146,11 @@ const getReturnItemColumnValues = (taskType, returnItem, isItemCustomTemplate) =
             monthColumn = isItemCustomTemplate
                 ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.CUSTOM_FILING_DATE_TEMPLATE_MONTH_COLUMN
                 : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.FILING_DATE_TEMPLATE_MONTH_COLUMN;
+            if (!isItemCustomTemplate && periodEndColumn) {
+                periodEndColumn = isItemCustomTemplate
+                    ? sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_PERIOD_END_COLUMN
+                    : sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_PERIOD_END_COLUMN;
+            }
             break;
         default:
             return [new error_1.InternalServerError(), null];
@@ -154,11 +163,16 @@ const getReturnItemColumnValues = (taskType, returnItem, isItemCustomTemplate) =
     if (monthColumnValueError) {
         return [monthColumnValueError, null];
     }
+    const [periodEndColumnValueError, periodEndColumnValue] = (0, monday_1.getColumnTextByColumnId)(returnItem, periodEndColumn);
+    if (periodEndColumnValueError) {
+        return [periodEndColumnValueError, null];
+    }
     return [
         null,
         {
             dayColumnValue,
             monthColumnValue,
+            periodEndColumnValue,
         },
     ];
 };

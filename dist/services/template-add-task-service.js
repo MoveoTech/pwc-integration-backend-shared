@@ -129,7 +129,8 @@ class TemplateAddTaskService {
             });
             return [submissionsDatesError, null];
         }
-        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, templateTask, taskType, parseInt(templateTask.id), parseInt(nextReturnItem.nextReturnItem.id), false, true);
+        const periodEnd = nextReturnItem.nextReturnItem.columns.find((column) => column.id === sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.DATA_PERIOD_END_COLUMN);
+        const [itemColumnsError, itemColumns] = (0, monday_1.createItemColumns)(submissionsDates, parentItem, templateTask, taskType, parseInt(templateTask.id), parseInt(nextReturnItem.nextReturnItem.id), false, true, undefined, undefined, periodEnd ? periodEnd === null || periodEnd === void 0 ? void 0 : periodEnd.text : '');
         if (itemColumnsError) {
             logger.error({
                 message: `itemColumnsError: ${JSON.stringify(itemColumnsError)}`,
