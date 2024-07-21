@@ -29,6 +29,13 @@ app.use(express_1.default.urlencoded({
 app.use(function (req, res, next) {
     res.setHeader('Cache-Control', 'no-store');
     res.setHeader('Pragma', 'no-cache');
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    next();
+});
+app.use((err, req, res, next) => {
+    if (err && err.status === 400 && 'body' in err) {
+        return res.status(400).send({ status: 400, message: 'Bad JSON Input' });
+    }
     next();
 });
 app.use(routes_1.default);
