@@ -4,20 +4,24 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.postRequest = void 0;
-const axios_1 = __importDefault(require("axios"));
 const logger_service_1 = require("./logger-service");
+//@ts-ignore
+const monday_sdk_js_1 = __importDefault(require("monday-sdk-js"));
 const logger = logger_service_1.LoggerService.getLogger();
-async function postRequest(url, token, body) {
+async function postRequest(url, token, body, query, variables) {
     try {
+        const mondayClient = (0, monday_sdk_js_1.default)({ token });
+        mondayClient.setApiVersion('2025-01');
         const options = {
             headers: {
                 'Content-Type': 'application/json',
-                'API-Version': '2024-01',
+                'API-Version': '2025-01',
                 Authorization: `${token}`,
             },
         };
-        const res = await axios_1.default.post(url, body, options);
-        return [null, res.data];
+        const response = await mondayClient.api(query, { variables: variables });
+        // const res = await axios.post(url, body, options);
+        return [null, response];
     }
     catch (error) {
         logger.error({
