@@ -4,7 +4,7 @@ exports.validateSyncIntegrationInputs = void 0;
 const logger_service_1 = require("../services/logger-service");
 const logger = logger_service_1.LoggerService.getLogger();
 const validateSyncIntegrationInputs = async (request, response, next) => {
-    var _a, _b, _c, _d;
+    var _a, _b, _c, _d, _e;
     try {
         logger.info({
             message: 'start',
@@ -20,6 +20,14 @@ const validateSyncIntegrationInputs = async (request, response, next) => {
             });
             return response.status(500).send({ error: 'missing input fields error' });
         }
+        if (boardId <= 0 || itemId <= 0) {
+            logger.error({
+                message: `invalid inputs in request payload: ${JSON.stringify((_d = request === null || request === void 0 ? void 0 : request.body) === null || _d === void 0 ? void 0 : _d.payload)}`,
+                fileName: 'integration middleware',
+                functionName: 'syncStatusAndTasks',
+            });
+            return response.status(400).send({ error: 'invalid input fields error' });
+        }
         response.locals.inputs = {
             boardId,
             itemId,
@@ -28,7 +36,7 @@ const validateSyncIntegrationInputs = async (request, response, next) => {
             message: 'inputs success',
             fileName: 'integration middleware',
             functionName: 'validateSyncIntegrationInputs',
-            data: `response.locals.inputs: ${JSON.stringify((_d = response === null || response === void 0 ? void 0 : response.locals) === null || _d === void 0 ? void 0 : _d.inputs)}`,
+            data: `response.locals.inputs: ${JSON.stringify((_e = response === null || response === void 0 ? void 0 : response.locals) === null || _e === void 0 ? void 0 : _e.inputs)}`,
         });
         next();
     }
