@@ -19,7 +19,19 @@ const queue_worker_service_1 = require("./services/queue-worker-service");
 const logger = logger_service_1.LoggerService.getLogger();
 const app = (0, express_1.default)();
 const port = (_a = process.env.PORT) !== null && _a !== void 0 ? _a : '8080';
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: [
+        'https://stgitxmodulemonday.pwc.co.uk/',
+        'https://itxmodulemonday.pwc.co.uk/',
+        'https://monday.com',
+        /\.monday\.com$/,
+        /\.monday-apps\.com$/,
+        /\.monday-time\.com$/,
+        /\.mondaylabs\.io$/,
+        /\.cdn2\.monday\.app$/
+    ],
+    credentials: true,
+}));
 app.use(express_1.default.json());
 app.use(body_parser_1.default.json({ limit: '20mb' }));
 app.use(body_parser_1.default.urlencoded({ limit: '20mb', extended: true }));
