@@ -15,7 +15,7 @@ async function postRequest(url, token, body, query, variables) {
         const options = {
             headers: {
                 'Content-Type': 'application/json',
-                'API-Version': '2025-01',
+                'API-Version': '2025-07',
                 Authorization: `${token}`,
             },
         };

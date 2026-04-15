@@ -23,7 +23,7 @@ const mondayApiUrl = 'https://api.monday.com/v2';
 class MondayService {
     constructor() {
         this.mondayClient = (0, monday_sdk_js_1.default)();
-        this.mondayClient.setApiVersion('2025-01');
+        this.mondayClient.setApiVersion('2025-07');
         this.queue = queue_1.default.getQueue();
     }
     async queryItemColumnsValues(monAccessToken, itemId) {
@@ -125,7 +125,7 @@ class MondayService {
             });
             const [responseError, response] = await (0, http_service_1.postRequest)(`${mondayApiUrl}`, monAccessToken, JSON.stringify({
                 query,
-                variables: JSON.stringify(variables),
+                variables: variables,
             }), query, variables);
             if (responseError) {
                 logger.error({
@@ -500,7 +500,7 @@ class MondayService {
                 functionName: 'executeQueryFromQueue',
                 data: `messages: ${JSON.stringify(messages)}`,
             });
-            this.mondayClient.setApiVersion('2025-01');
+            this.mondayClient.setApiVersion('2025-07');
             const cacheService = cache_service_1.CacheService.getCacheService();
             const cachedComplexity = cacheService.getKey(cache_1.CACHE.COMPLEXITY);
             const complexity = JSON.parse(cachedComplexity);
