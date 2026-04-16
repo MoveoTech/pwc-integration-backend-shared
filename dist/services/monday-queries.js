@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queries = void 0;
+const sync_integration_columns_1 = require("../constants/sync-integration-columns");
 exports.queries = {
     //TODO: update
     queryItemColumnsValues: `query ($itemId: [ID!]) {
@@ -77,7 +78,7 @@ exports.queries = {
         parent_item {
           id
         }
-        column_values {
+        column_values (ids: ["${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.OBLIGATION_PRODUCE_TASKS_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_BUSINESS_STREAM_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.BUSINESS_STREAM_PRODUCE_TASKS_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_DUE_DATE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ORDER_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_SUBMISSION_DUE_DATE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN}"]) {
           id
           text
         }
@@ -99,7 +100,7 @@ exports.queries = {
         parent_item {
           id
         }
-        column_values {
+        column_values (ids: ["${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_TYPE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OBLIGATION_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.OBLIGATION_PRODUCE_TASKS_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_BUSINESS_STREAM_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.BUSINESS_STREAM_PRODUCE_TASKS_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_DUE_DATE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ORDER_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_RETURN_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_ID_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_SUBMISSION_DUE_DATE_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_OWNER_COLUMN}", "${sync_integration_columns_1.SYNC_INTEGRATION_COLUMNS.TASK_REGION_COLUMN}"]) {
           id
           text
         }
