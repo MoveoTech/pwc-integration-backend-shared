@@ -86,7 +86,7 @@ class IntegrationService {
         }
         const filterRelevantTasks = filterFutureTasks.filter((itemData) => itemData.taskDueDate > currentTaskDateObj ||
             (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
-                itemData.taskOrder > currentTaskOrder &&
+                +itemData.taskOrder > +currentTaskOrder &&
                 itemData.taskReturnId === currentTaskReturnId) ||
             (itemData.taskDueDate.getTime() === currentTaskDateObj.getTime() &&
                 itemData.taskReturnId !== currentTaskReturnId));
