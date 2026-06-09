@@ -50,8 +50,16 @@ app.use((err, req, res, next) => {
     }
     next();
 });
+app.get('/health', (_req, res) => res.sendStatus(200));
 app.use(routes_1.default);
 const main = async () => {
+    app.listen(port, () => {
+        logger.info({
+            message: `pwc integration app listening at http://localhost:${port}`,
+            fileName: 'app',
+            functionName: 'main',
+        });
+    });
     try {
         (0, configure_http_1.configureHttp)();
         const queueConnection = {
@@ -62,25 +70,10 @@ const main = async () => {
                 servername: process.env.REDIS_HOST,
             },
         };
-        // const queueConnection = {
-        //   port: Number(6379),
-        //   host: 'localhost',
-        //   // password: process.env.REDIS_PASS,
-        //   // tls: {
-        //   //   servername: process.env.REDIS_HOST,
-        //   // },
-        // };
         queue_1.default.setQueueConnection(queueConnection);
         const queue = (0, queue_service_1.createQueue)();
         queue_1.default.setQueue(queue);
         (0, queue_worker_service_1.createWorker)();
-        app.listen(port, () => {
-            logger.info({
-                message: `pwc integration app listening at http://localhost:${port}`,
-                fileName: 'app',
-                functionName: 'main',
-            });
-        });
     }
     catch (error) {
         logger.error({

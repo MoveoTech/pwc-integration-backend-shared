@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.queries = void 0;
-const sync_integration_columns_1 = require("../../src/constants/sync-integration-columns");
+const sync_integration_columns_1 = require("../constants/sync-integration-columns");
 exports.queries = {
     //TODO: update
     queryItemColumnsValues: `query ($itemId: [ID!]) {
