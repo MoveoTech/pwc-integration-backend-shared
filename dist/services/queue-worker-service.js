@@ -42,6 +42,12 @@ const handleFail = async (job, error) => {
         functionName: 'handleFail',
         data: JSON.stringify(error),
     });
+    // MUTATION_EXCEEDED is a transient per-minute Monday rate limit that resets in ~60s
+    // (matched by the fixed 60s backoff). Leave the job in place so BullMQ retries it —
+    // removing it here permanently strands the task on "Done".
+    if ((job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.MUTATION_EXCEEDED) {
+        return;
+    }
     if ((job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.INVALID_EXPIRE_TIME ||
         (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.RETRY_JOB_OF_UNDEFINED ||
         (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.COULD_NOT_FIND_PROJECT ||
@@ -50,8 +56,7 @@ const handleFail = async (job, error) => {
     }
     else if ((job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.BOARD_MAX_SIZE ||
         (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.COLUMN_MAX_SIZE ||
-        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.UNAUTHORIZED_USER ||
-        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.MUTATION_EXCEEDED) {
+        (job === null || job === void 0 ? void 0 : job.failedReason) === job_failures_1.default.UNAUTHORIZED_USER) {
         const { monAccountId, boardId } = job === null || job === void 0 ? void 0 : job.data;
         const blockedBoardCacheKey = `blocked_board_${monAccountId}-${boardId}`;
         cacheService.setKey(blockedBoardCacheKey, JSON.stringify(true), 3600);
